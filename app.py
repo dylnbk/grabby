@@ -1,4 +1,5 @@
 import streamlit as st
+from pytube import YouTube
 
 # page configurations
 st.set_page_config(
@@ -20,14 +21,20 @@ local_css("style.css")
 
 st.title('Grab it.')
 
-form = st.form("input", clear_on_submit=True)
-video = form.text_input('Enter the YouTube link:', placeholder='https://www.youtube.com/watch...')
+text_contents = "derp"
 
-col1, col2 = st.columns([1,1])
+with st.form("input", clear_on_submit=True):
 
-with col1:
-    selection = form.selectbox('Selection', ('Video', 'Audio', 'Playlist'), label_visibility="collapsed")
-with col2:
-    form.form_submit_button("Submit")
+    video = st.text_input('Enter the YouTube link:', placeholder='https://www.youtube.com/watch...')
 
+    col1, col2 = st.columns([7,1])
 
+    with col1:
+        selection = st.selectbox('Selection', ('Video', 'Audio', 'Playlist'), label_visibility="collapsed")
+    with col2:
+        test = st.form_submit_button("Submit")
+    if test:
+        if video:
+            yt = YouTube(video)
+            st.video(video)
+            #stream.download()
