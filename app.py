@@ -17,24 +17,34 @@ def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
+def progress_func(stream, chunk, bytes_remaining):
+    size = stream.filesize
+    p = int((float(abs(bytes_remaining-size)/size))*float(100))
+    bar.progress(p)
+
 local_css("style.css")
 
+test_data = "random"
+# begin
 st.title('Grab it.')
-
-text_contents = "derp"
 
 with st.form("input", clear_on_submit=True):
 
-    video = st.text_input('Enter the YouTube link:', placeholder='https://www.youtube.com/watch...')
+    url_from_user = st.text_input('Enter the YouTube link:', placeholder='https://www.youtube.com/watch...')
 
     col1, col2 = st.columns([7,1])
 
     with col1:
         selection = st.selectbox('Selection', ('Video', 'Audio', 'Playlist'), label_visibility="collapsed")
     with col2:
-        test = st.form_submit_button("Submit")
-    if test:
-        if video:
-            yt = YouTube(video)
-            st.video(video)
-            #stream.download()
+        confirm_selection = st.form_submit_button("Submit")
+
+with st.container():
+    if confirm_selection:
+        if url_from_user:
+            bar = st.progress(0)
+            yt = YouTube(url_from_user, on_progress_callback=progress_func)
+            stream = yt.streams.get_by_itag(22)
+            st.video(url_from_user)
+            with open(stream.download(), "rb") as file:
+                st.download_button("Download", data=file, file_name="grabit.mp4", mime="video/mp4")
