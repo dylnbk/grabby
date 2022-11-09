@@ -4,7 +4,7 @@ from pytube import YouTube
 # page configurations
 st.set_page_config(
     page_title="Grab it.",
-    page_icon="∞",
+    page_icon="▶️",
     menu_items={
         'Report a bug': "mailto:dyln.bk@gmail.com",
         'Get help': None,
@@ -47,4 +47,4 @@ with st.container():
             stream = yt.streams.get_by_itag(22)
             st.video(url_from_user)
             with open(stream.download(), "rb") as file:
-                st.download_button("Download", data=file, file_name="grabit.mp4", mime="video/mp4")
+                st.download_button("Download", data=file, file_name="grabit.mp4", mime="video")
