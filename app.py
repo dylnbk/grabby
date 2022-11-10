@@ -32,7 +32,7 @@ with st.form("input", clear_on_submit=True):
 
     url_from_user = st.text_input('Enter the YouTube link:', placeholder='https://www.youtube.com/watch...')
 
-    col1, col2 = st.columns([7,1])
+    col1, col2 = st.columns([6.5, 1])
 
     with col1:
         selection = st.selectbox('Selection', ('Video', 'Audio', 'Playlist'), label_visibility="collapsed")
