@@ -29,25 +29,43 @@ def youtube_download():
 
     # grab YouTube datastream, on_progress_callback generates progress bar data
     yt = YouTube(url_from_user, on_progress_callback=progress_func)
+
+    # filter adpative / progressive streams, adaptive = audio & video are seperated 
     stream_adaptive = yt.streams.filter(adaptive=True)
     stream_progressive = yt.streams.filter(progressive=True)
+
+    # if it's an adaptive stream
     if stream_adaptive:
+
+        # grab the highest quality video and audio stream
         video_stream = stream_adaptive[0]
         audio_stream = stream_adaptive[-1]
+
+        # capture the audio file type
         audio_type = audio_stream.mime_type.partition("/")[2]
         video_type = video_stream.mime_type.partition("/")[2]
+
+        # create a file path
         video_path = video_stream.download(filename=f"video.{video_type}")
         audio_path = audio_stream.download(filename=f"audio.{audio_type}")
+
+        # prep ffmpeg merge with video and audio input
         input_video = ffmpeg.input(video_path)
         input_audio = ffmpeg.input(audio_path)
+
+        # merge the files into a sinle output
         ffmpeg.output(input_audio, input_video, f'finished_video.{video_type}').run()
+
+        # create a download button for the user
         with open(f"finished_video.{video_type}", "rb") as file:
             st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
+
+    # if it's a progressive stream 
     elif stream_progressive:
+
+        # create a download button for the user, can output directly with pytube download()
         with open(stream_progressive.download(), "rb") as file:
             st.download_button("Download", data=file, file_name="grabit", mime="video")
-    else:
-        st.write("Something went wrong :c")
 
 # main
 local_css("style.css")
