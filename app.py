@@ -29,7 +29,7 @@ def youtube_download(media_type):
 
     # grab YouTube datastream, on_progress_callback generates progress bar data
     yt = YouTube(url_from_user, on_progress_callback=progress_func)
-    st.write(yt.streams)
+    st.write(yt)
 
     # if the user wants full video
     if media_type == "Video":
