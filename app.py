@@ -34,7 +34,10 @@ def youtube_download(media_type):
     if media_type == "Video":
 
         # filter adpative / progressive streams, adaptive = audio & video are seperated 
-        stream_adaptive = yt.streams.filter(adaptive=True)
+        try: 
+            stream_adaptive = yt.streams.filter(adaptive=True) 
+        except Exception as inst:
+            st.write(inst)
         stream_progressive = yt.streams.filter(progressive=True)
 
         # if it's an adaptive stream
@@ -70,11 +73,10 @@ def youtube_download(media_type):
             with open(stream_progressive.download(), "rb") as file:
                 st.download_button("Download", data=file, file_name="grabit", mime="video")
     
-    # if user selects audio only
+    # if the user wants audio only
     elif media_type == "Audio":
 
         new_stream = yt.streams[-1]
-        st.write(new_stream)
 
         if new_stream.type == "audio":
 
