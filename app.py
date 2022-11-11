@@ -49,11 +49,6 @@ def youtube_download():
     else:
         st.write("Something went wrong :c")
 
-    
-    # generate option to download file
-    # with open(stream.download(), "rb") as file:
-    #    st.download_button("Download", data=file, file_name="grabit.mp4", mime="video")
-
 # main
 local_css("style.css")
 st.title('Grab it.')
