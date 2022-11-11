@@ -32,8 +32,7 @@ def youtube_download(media_type):
 
     # if the user wants full video
     if media_type == "Video":
-        st.write(yt.streams)
-'''
+
         # filter adpative / progressive streams, adaptive = audio & video are seperated 
         stream_adaptive = yt.streams.filter(adaptive=True)
         stream_progressive = yt.streams.filter(progressive=True)
@@ -100,7 +99,7 @@ def youtube_download(media_type):
             # create a download button for the user
             with open(f"finished_audio.mp3", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
-'''
+
 
 
 # main
