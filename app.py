@@ -34,19 +34,15 @@ def youtube_download():
     if stream_adaptive:
         video_stream = stream_adaptive[0]
         audio_stream = stream_adaptive[-1]
-        video_path = video_stream.download()
-        audio_path = audio_stream.download()
+        audio_type = audio_stream.mime_type.partition("/")[2]
+        video_type = video_stream.mime_type.partition("/")[2]
+        video_path = video_stream.download(filename=f"video.{video_type}")
+        audio_path = audio_stream.download(filename=f"audio.{audio_type}")
         input_video = ffmpeg.input(video_path)
         input_audio = ffmpeg.input(audio_path)
-        #st.write(type(merged_video))
-        try:
-            merged = ffmpeg.concat(input_video, input_audio, v=1, a=1).output('finished_video')
-            st.write(merged)
-            with open(merged, "rb") as file:
-                st.download_button("Download", data=file, file_name="grabit", mime="video")
-        except Exception as e:
-            st.write(e)
-
+        ffmpeg.output(input_audio, input_video, f'finished_video.{video_type}').run()
+        with open(f"finished_video.{video_type}", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
     elif stream_progressive:
         with open(stream_progressive.download(), "rb") as file:
             st.download_button("Download", data=file, file_name="grabit", mime="video")
