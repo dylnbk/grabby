@@ -29,6 +29,7 @@ def youtube_download():
 
     # grab YouTube datastream, on_progress_callback generates progress bar data
     yt = YouTube(url_from_user, on_progress_callback=progress_func)
+<<<<<<< HEAD
     stream_adaptive = yt.streams.filter(adaptive=True)
     stream_progressive = yt.streams.filter(progressive=True)
     if stream_adaptive:
@@ -57,6 +58,13 @@ def youtube_download():
     # generate option to download file
     # with open(stream.download(), "rb") as file:
     #    st.download_button("Download", data=file, file_name="grabit.mp4", mime="video")
+=======
+    stream = yt.streams.get_by_itag(22)
+    
+    # generate option to download file
+    with open(stream.download(), "rb") as file:
+        st.download_button("Download", data=file, file_name="grabit.mp4", mime="video")
+>>>>>>> 948c3e5d6da34aed20014e486c4039b9384f5115
 
 # main
 local_css("style.css")
