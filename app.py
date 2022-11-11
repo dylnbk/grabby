@@ -29,6 +29,7 @@ def youtube_download(media_type):
 
     # grab YouTube datastream, on_progress_callback generates progress bar data
     yt = YouTube(url_from_user, on_progress_callback=progress_func)
+    st.write(yt.streams)
 
     # if the user wants full video
     if media_type == "Video":
@@ -36,6 +37,7 @@ def youtube_download(media_type):
         # filter adpative / progressive streams, adaptive = audio & video are seperated 
         stream_adaptive = yt.streams.filter(adaptive=True)
         stream_progressive = yt.streams.filter(progressive=True)
+        st.write(stream_adaptive, stream_progressive)
 
         # if it's an adaptive stream
         if stream_adaptive:
