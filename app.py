@@ -32,7 +32,7 @@ def youtube_download(media_type):
 
     # if the user wants full video
     if media_type == "Video":
-        st.write(yt)
+        st.write(yt.streams)
 '''
         # filter adpative / progressive streams, adaptive = audio & video are seperated 
         stream_adaptive = yt.streams.filter(adaptive=True)
