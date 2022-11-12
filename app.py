@@ -48,9 +48,12 @@ def youtube_download(media_type):
                 # grab the highest quality video 
                 video_stream = stream_progressive[-1]
 
+                # capture file type
+                video_type = video_stream.mime_type.partition("/")[2]
+
                 # create a download button for the user, can output directly with pytube download()
                 with open(video_stream.download(), "rb") as file:
-                    st.download_button("Download", data=file, file_name="grabit", mime="video")
+                    st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
 
             # if it's a progressive stream only
             elif stream_adaptive:
