@@ -1,4 +1,5 @@
 import streamlit as st
+import uuid
 from pytube import YouTube
 import ffmpeg
 
@@ -23,6 +24,11 @@ def progress_func(stream, chunk, bytes_remaining):
     size = stream.filesize
     p = int((float(abs(bytes_remaining-size)/size))*float(100))
     bar.progress(p)
+
+# generate random file names
+def file_name():
+    result = str(uuid.uuid4().hex)
+    return result
 
 # YouTube downloader
 def youtube_download(media_type):
@@ -53,7 +59,7 @@ def youtube_download(media_type):
 
                 # create a download button for the user, can output directly with pytube download()
                 with open(video_stream.download(), "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
 
             # if it's a progressive stream only
             elif stream_adaptive:
@@ -67,19 +73,22 @@ def youtube_download(media_type):
                 video_type = video_stream.mime_type.partition("/")[2]
 
                 # create media and store file path
-                video_path = video_stream.download(filename=f"video.{video_type}")
-                audio_path = audio_stream.download(filename=f"audio.{audio_type}")
+                video_path = video_stream.download(filename=f"{file_name()}.{video_type}")
+                audio_path = audio_stream.download(filename=f"{file_name()}.{audio_type}")
 
                 # prep ffmpeg merge with video and audio input
                 input_video = ffmpeg.input(video_path)
                 input_audio = ffmpeg.input(audio_path)
 
+                # random file name
+                output = file_name()
+
                 # merge the files into a single output
-                ffmpeg.output(input_audio, input_video, f'finished_video.{video_type}').run()
+                ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
 
                 # create a download button for the user
-                with open(f"finished_video.{video_type}", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
+                with open(f"{output}.{video_type}", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
         
         except Exception:
             st.error(f"This link is currently unavailble to download... ", icon="🚨")
@@ -104,12 +113,15 @@ def youtube_download(media_type):
                 # prep ffmpeg with input
                 input_audio = ffmpeg.input(audio_path)
 
-                # output the audio only
-                ffmpeg.output(input_audio, f'finished_audio.mp3').run()
+                # random file name
+                output = file_name()
+
+                # convert to mp3
+                ffmpeg.output(input_audio, f'{output}.mp3').run()
                 
                 # create a download button for the user, can output directly with pytube download()
-                with open("finished_audio.mp3", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
+                with open(f"{output}.mp3", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
             # if video only available, extract the audio
             else:
@@ -126,12 +138,15 @@ def youtube_download(media_type):
                 # prep ffmpeg with video input
                 input_video = ffmpeg.input(video_path)
 
+                # random file name
+                output = file_name()
+
                 # output the audio only
-                ffmpeg.output(input_video, f'finished_audio.mp3').run()
+                ffmpeg.output(input_video, f'{output}.mp3').run()
 
                 # create a download button for the user
-                with open(f"finished_audio.mp3", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
+                with open(f"{output}.mp3", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
         except Exception:
             st.error(f"This link is currently unavailble to download... ", icon="🚨")
@@ -146,17 +161,27 @@ with st.form("input", clear_on_submit=True):
     # get user URL with a text input box
     url_from_user = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
-    # create a column layout for the selectbox and submit button
+    # create a column layout
     col1, col2 = st.columns([6.5, 1])
+
+    # create a selection drop down box
     with col1:
         selection = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+
+    # create a sumbit button
     with col2:
         confirm_selection = st.form_submit_button("Submit")
 
-if confirm_selection:
+try:
 
-    # initialize a progress bar
-    bar = st.progress(0)
+    # if there is input by the user
+    if confirm_selection:
 
-    # grab content and generate download button
-    youtube_download(selection)
+        # initialize a progress bar
+        bar = st.progress(0)
+
+        # grab content and generate download button
+        youtube_download(selection)
+
+except Exception:
+            st.error(f"This link is currently unavailble to download... ", icon="🚨")
