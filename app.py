@@ -173,7 +173,7 @@ with st.form("input", clear_on_submit=True):
         confirm_selection = st.form_submit_button("Submit")
 
 try:
-
+    
     # if there is input by the user
     if confirm_selection:
 
