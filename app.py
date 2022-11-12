@@ -76,7 +76,7 @@ def youtube_download(media_type):
                     st.download_button("Download", data=file, file_name="grabit", mime="video")
         
         except Exception as e:
-            st.write(f"This link is currently unavailble to download :c")
+            st.write(f"This link is currently unavailble to download...")
     
     # if the user wants audio only
     elif media_type == "Audio":
@@ -120,7 +120,7 @@ def youtube_download(media_type):
                     st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
         
         except Exception as e:
-            st.write(f"This link is currently unavailble to download :c")
+            st.write(f"This link is currently unavailble to download...")
 
 # main
 local_css("style.css")
