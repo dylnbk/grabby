@@ -43,7 +43,19 @@ def youtube_download(media_type):
             st.video(url_from_user)
 
             # if it's an adaptive stream
-            if stream_adaptive:
+            if stream_progressive:
+
+                # grab the highest quality video 
+                video_stream = stream_progressive[-1]
+
+                st.write(video_stream)
+
+                # create a download button for the user, can output directly with pytube download()
+                with open(video_stream.download(), "rb") as file:
+                    st.download_button("Download", data=file, file_name="grabit", mime="video")
+
+            # if it's a progressive stream only
+            elif stream_adaptive:
 
                 # grab the highest quality video and audio stream
                 video_stream = stream_adaptive[0]
@@ -67,13 +79,6 @@ def youtube_download(media_type):
                 # create a download button for the user
                 with open(f"finished_video.{video_type}", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
-
-            # if it's a progressive stream 
-            elif stream_progressive:
-
-                # create a download button for the user, can output directly with pytube download()
-                with open(stream_progressive.download(), "rb") as file:
-                    st.download_button("Download", data=file, file_name="grabit", mime="video")
         
         except Exception as e:
             st.error(f"This link is currently unavailble to download... ", icon="🚨")
@@ -82,7 +87,8 @@ def youtube_download(media_type):
     elif media_type == "Audio":
 
         try:
-                
+            
+            # grab the highest quality audio stream
             new_stream = yt.streams[-1]
 
             # display users video
