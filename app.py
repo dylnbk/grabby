@@ -91,7 +91,7 @@ def youtube_download(media_type):
                     st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
         
         except Exception:
-            st.error(f"This link is currently unavailable to download... ", icon="💔")
+            st.error(f"Sorry, this link is currently unavailable to download... ", icon="💔")
     
     # if the user wants audio only
     elif media_type == "Audio":
@@ -149,7 +149,7 @@ def youtube_download(media_type):
                     st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
         except Exception:
-            st.error(f"This link is currently unavailable to download... ", icon="💔")
+            st.error(f"Sorry, this link is currently unavailable to download... ", icon="💔")
 
 # main
 local_css("style.css")
@@ -184,4 +184,4 @@ try:
         youtube_download(selection)
 
 except Exception:
-            st.error(f"This link is currently unavailable to download... ", icon="💔")
+            st.error(f"Sorry, this link is currently unavailable to download... ", icon="💔")
