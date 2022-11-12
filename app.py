@@ -108,7 +108,7 @@ def youtube_download(media_type):
                 st.video(url_from_user)
 
                 # create media and store file path
-                audio_path = audio_stream[-1].download(filename=f"audio")
+                audio_path = audio_stream[-1].download(filename=f"{file_name()}")
 
                 # prep ffmpeg with input
                 input_audio = ffmpeg.input(audio_path)
