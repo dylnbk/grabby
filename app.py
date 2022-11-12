@@ -142,7 +142,7 @@ with st.form("input", clear_on_submit=True):
 if confirm_selection:
 
     # initialize a progress bar
-    bar = st.progress(3)
+    bar = st.progress(0)
 
     # grab content and generate download button
     youtube_download(selection)
