@@ -48,8 +48,6 @@ def youtube_download(media_type):
                 # grab the highest quality video 
                 video_stream = stream_progressive[-1]
 
-                st.write(video_stream)
-
                 # create a download button for the user, can output directly with pytube download()
                 with open(video_stream.download(), "rb") as file:
                     st.download_button("Download", data=file, file_name="grabit", mime="video")
@@ -80,26 +78,27 @@ def youtube_download(media_type):
                 with open(f"finished_video.{video_type}", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
         
-        except Exception as e:
+        except Exception:
             st.error(f"This link is currently unavailble to download... ", icon="🚨")
     
     # if the user wants audio only
     elif media_type == "Audio":
 
         try:
+
+            # check for audio only streams
+            audio_stream = yt.streams.filter(only_audio=True)
             
-            # grab the highest quality audio stream
-            new_stream = yt.streams[-1]
+            # if audio only is available convert to mp3 and provide download button
+            if audio_stream:
 
-            # display users video
-            st.video(url_from_user)
+                # display users video
+                st.video(url_from_user)
 
-            if new_stream.type == "audio":
+                # create media and store file path
+                audio_path = audio_stream[-1].download(filename=f"audio")
 
-            # create media and store file path
-                audio_path = new_stream.download(filename=f"audio")
-
-                # prep ffmpeg with video input
+                # prep ffmpeg with input
                 input_audio = ffmpeg.input(audio_path)
 
                 # output the audio only
@@ -111,6 +110,12 @@ def youtube_download(media_type):
 
             # if video only available, extract the audio
             else:
+
+                # grab the highest quality stream
+                new_stream = yt.streams[-1]
+
+                # display users video
+                st.video(url_from_user)
 
                 # create media and store file path
                 video_path = new_stream.download(filename=f"video")
@@ -124,9 +129,10 @@ def youtube_download(media_type):
                 # create a download button for the user
                 with open(f"finished_audio.mp3", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
-        
-        except Exception as e:
+
+        except Exception:
             st.error(f"This link is currently unavailble to download... ", icon="🚨")
+
 # main
 local_css("style.css")
 st.title('Grab it.')
