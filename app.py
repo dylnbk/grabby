@@ -33,80 +33,88 @@ def youtube_download(media_type):
     # if the user wants full video
     if media_type == "Video":
 
-        # filter adpative / progressive streams, adaptive = audio & video are seperated 
-        stream_adaptive = yt.streams.filter(adaptive=True)
-        stream_progressive = yt.streams.filter(progressive=True)
+        try:
+                
+            # filter adpative / progressive streams, adaptive = audio & video are seperated 
+            stream_adaptive = yt.streams.filter(adaptive=True)
+            stream_progressive = yt.streams.filter(progressive=True)
 
-        # if it's an adaptive stream
-        if stream_adaptive:
+            # if it's an adaptive stream
+            if stream_adaptive:
 
-            # grab the highest quality video and audio stream
-            video_stream = stream_adaptive[0]
-            audio_stream = stream_adaptive[-1]
+                # grab the highest quality video and audio stream
+                video_stream = stream_adaptive[0]
+                audio_stream = stream_adaptive[-1]
 
-            # capture the file type
-            audio_type = audio_stream.mime_type.partition("/")[2]
-            video_type = video_stream.mime_type.partition("/")[2]
+                # capture the file type
+                audio_type = audio_stream.mime_type.partition("/")[2]
+                video_type = video_stream.mime_type.partition("/")[2]
 
-            # create media and store file path
-            video_path = video_stream.download(filename=f"video.{video_type}")
-            audio_path = audio_stream.download(filename=f"audio.{audio_type}")
+                # create media and store file path
+                video_path = video_stream.download(filename=f"video.{video_type}")
+                audio_path = audio_stream.download(filename=f"audio.{audio_type}")
 
-            # prep ffmpeg merge with video and audio input
-            input_video = ffmpeg.input(video_path)
-            input_audio = ffmpeg.input(audio_path)
+                # prep ffmpeg merge with video and audio input
+                input_video = ffmpeg.input(video_path)
+                input_audio = ffmpeg.input(audio_path)
 
-            # merge the files into a single output
-            ffmpeg.output(input_audio, input_video, f'finished_video.{video_type}').run()
+                # merge the files into a single output
+                ffmpeg.output(input_audio, input_video, f'finished_video.{video_type}').run()
 
-            # create a download button for the user
-            with open(f"finished_video.{video_type}", "rb") as file:
-                st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
+                # create a download button for the user
+                with open(f"finished_video.{video_type}", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"grabit.{video_type}", mime="video")
 
-        # if it's a progressive stream 
-        elif stream_progressive:
+            # if it's a progressive stream 
+            elif stream_progressive:
 
-            # create a download button for the user, can output directly with pytube download()
-            with open(stream_progressive.download(), "rb") as file:
-                st.download_button("Download", data=file, file_name="grabit", mime="video")
+                # create a download button for the user, can output directly with pytube download()
+                with open(stream_progressive.download(), "rb") as file:
+                    st.download_button("Download", data=file, file_name="grabit", mime="video")
+        
+        except Exception as e:
+            st.write(f"Something went wrong: {e}")
     
     # if the user wants audio only
     elif media_type == "Audio":
 
-        new_stream = yt.streams[-1]
+        try:
+                
+            new_stream = yt.streams[-1]
 
-        if new_stream.type == "audio":
-
-           # create media and store file path
-            audio_path = new_stream.download(filename=f"audio")
-
-            # prep ffmpeg with video input
-            input_audio = ffmpeg.input(audio_path)
-
-            # output the audio only
-            ffmpeg.output(input_audio, f'finished_audio.mp3').run()
-            
-            # create a download button for the user, can output directly with pytube download()
-            with open("finished_audio.mp3", "rb") as file:
-                st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
-
-        # if video only available, extract the audio
-        else:
+            if new_stream.type == "audio":
 
             # create media and store file path
-            video_path = new_stream.download(filename=f"video")
+                audio_path = new_stream.download(filename=f"audio")
 
-            # prep ffmpeg with video input
-            input_video = ffmpeg.input(video_path)
+                # prep ffmpeg with video input
+                input_audio = ffmpeg.input(audio_path)
 
-            # output the audio only
-            ffmpeg.output(input_video, f'finished_audio.mp3').run()
+                # output the audio only
+                ffmpeg.output(input_audio, f'finished_audio.mp3').run()
+                
+                # create a download button for the user, can output directly with pytube download()
+                with open("finished_audio.mp3", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
 
-            # create a download button for the user
-            with open(f"finished_audio.mp3", "rb") as file:
-                st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
+            # if video only available, extract the audio
+            else:
 
+                # create media and store file path
+                video_path = new_stream.download(filename=f"video")
 
+                # prep ffmpeg with video input
+                input_video = ffmpeg.input(video_path)
+
+                # output the audio only
+                ffmpeg.output(input_video, f'finished_audio.mp3').run()
+
+                # create a download button for the user
+                with open(f"finished_audio.mp3", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
+        
+        except Exception as e:
+            st.write(f"Something went wrong: {e}")
 
 # main
 local_css("style.css")
