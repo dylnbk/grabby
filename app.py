@@ -77,12 +77,18 @@ def youtube_download(media_type):
 
         if new_stream.type == "audio":
 
-            # capture the audio file type
-            audio_type = new_stream.mime_type.partition("/")[2]
+           # create media and store file path
+            audio_path = new_stream.download(filename=f"audio")
+
+            # prep ffmpeg with video input
+            input_audio = ffmpeg.input(audio_path)
+
+            # output the audio only
+            ffmpeg.output(input_audio, f'finished_audio.mp3').run()
             
             # create a download button for the user, can output directly with pytube download()
-            with open(new_stream.download(), "rb") as file:
-                st.download_button("Download", data=file, file_name=f"grabit.{audio_type}", mime="audio")
+            with open("finished_audio.mp3", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"grabit.mp3", mime="audio")
 
         # if video only available, extract the audio
         else:
