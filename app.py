@@ -39,6 +39,9 @@ def youtube_download(media_type):
             stream_adaptive = yt.streams.filter(adaptive=True)
             stream_progressive = yt.streams.filter(progressive=True)
 
+            # display users video
+            st.video(url_from_user)
+
             # if it's an adaptive stream
             if stream_adaptive:
 
@@ -81,6 +84,9 @@ def youtube_download(media_type):
         try:
                 
             new_stream = yt.streams[-1]
+
+            # display users video
+            st.video(url_from_user)
 
             if new_stream.type == "audio":
 
@@ -137,9 +143,6 @@ if confirm_selection:
 
     # initialize a progress bar
     bar = st.progress(3)
-    
-    # display users video
-    st.video(url_from_user)
 
     # grab content and generate download button
     youtube_download(selection)
