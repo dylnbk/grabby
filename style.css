@@ -19,6 +19,8 @@
 }
 
 .row-widget.stButton {
+    -ms-transform: translateY(8%);
+    transform: translateY(8%);
     text-align: center;
 }
 

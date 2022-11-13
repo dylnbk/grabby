@@ -48,7 +48,7 @@ def youtube_download(media_type):
             # display users video
             st.video(url_from_user)
 
-            # if it's an adaptive stream
+            # if it's a progressive stream, for now use this as it's the fastest option
             if stream_progressive:
 
                 # grab the highest quality video 
@@ -61,7 +61,7 @@ def youtube_download(media_type):
                 with open(video_stream.download(), "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
 
-            # if it's a progressive stream only
+            # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
             elif stream_adaptive:
 
                 # grab the highest quality video and audio stream
@@ -90,8 +90,8 @@ def youtube_download(media_type):
                 with open(f"{output}.{video_type}", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
         
-        except Exception:
-            st.error(f"Sorry, this link is currently unavailable to download... ", icon="💔")
+        except Exception as e:
+            st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
     
     # if the user wants audio only
     elif media_type == "Audio":
@@ -148,8 +148,8 @@ def youtube_download(media_type):
                 with open(f"{output}.mp3", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
-        except Exception:
-            st.error(f"Sorry, this link is currently unavailable to download... ", icon="💔")
+        except Exception as e:
+            st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
 
 # main
 local_css("style.css")
@@ -183,5 +183,5 @@ try:
         # grab content and generate download button
         youtube_download(selection)
 
-except Exception:
-            st.error(f"Sorry, this link is currently unavailable to download... ", icon="💔")
+except Exception as e:
+            st.error(f"This link is currently unavailable to download...", icon="💔")
