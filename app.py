@@ -198,7 +198,13 @@ def reddit_download(media_type):
 
             # if video is YouTube content, show error message as still figuring out a way to get this working
             if "youtu.be" in video_object.postLink or "youtube.com" in video_object.postLink:
-                st.error(f"Please use the YouTube option...", icon="💔")
+                
+                # bar progress complete
+                bar.progress(100)
+                
+                # create a download button for the user
+                with open(f"{output}.mp4", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
 
             # if it's a Reddit video, display a download button
             else:
