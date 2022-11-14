@@ -1,7 +1,12 @@
 import streamlit as st
+import os
 import uuid
-from pytube import YouTube
 import ffmpeg
+from os.path import basename
+from zipfile import ZipFile
+from pytube import YouTube
+from pytube.exceptions import *
+from RedDownloader import RedDownloader
 
 # page configurations
 st.set_page_config(
@@ -34,7 +39,7 @@ def file_name():
 def youtube_download(media_type):
 
     # grab YouTube datastream, on_progress_callback generates progress bar data
-    yt = YouTube(url_from_user, on_progress_callback=progress_func)
+    yt = YouTube(url_from_user_youtube, on_progress_callback=progress_func)
 
     # if the user wants full video
     if media_type == "Video":
@@ -46,7 +51,7 @@ def youtube_download(media_type):
             stream_progressive = yt.streams.filter(progressive=True)
 
             # display users video
-            st.video(url_from_user)
+            st.video(url_from_user_youtube)
 
             # if it's a progressive stream, for now use this as it's the fastest option
             if stream_progressive:
@@ -90,7 +95,20 @@ def youtube_download(media_type):
                 with open(f"{output}.{video_type}", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
         
-        except Exception as e:
+        # Try statments using pytube errors
+        except VideoPrivate:
+            st.error(" This video is private, you can't download it", icon="💔")
+        except RegexMatchError:
+            st.error(f" Invalid link format", icon="💔")
+        except RecordingUnavailable:
+            st.error(f" This recording is unavailable", icon="💔")
+        except MembersOnly:
+            st.error(f" This video is for channel members only", icon="💔")
+        except LiveStreamError:
+            st.error(f"This is a livestream, it cannot be downloaded", icon="💔")
+        except HTMLParseError as e:
+            st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
+        except VideoUnavailable as e:
             st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
     
     # if the user wants audio only
@@ -105,7 +123,7 @@ def youtube_download(media_type):
             if audio_stream:
 
                 # display users video
-                st.video(url_from_user)
+                st.video(url_from_user_youtube)
 
                 # create media and store file path
                 audio_path = audio_stream[-1].download(filename=f"{file_name()}")
@@ -130,7 +148,7 @@ def youtube_download(media_type):
                 new_stream = yt.streams[-1]
 
                 # display users video
-                st.video(url_from_user)
+                st.video(url_from_user_youtube)
 
                 # create media and store file path
                 video_path = new_stream.download(filename=f"video")
@@ -148,40 +166,239 @@ def youtube_download(media_type):
                 with open(f"{output}.mp3", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
-        except Exception as e:
+        # Try statments using pytube errors
+        except VideoPrivate:
+            st.error(" This video is private, you can't download it", icon="💔")
+        except RegexMatchError:
+            st.error(f" Invalid link format", icon="💔")
+        except RecordingUnavailable:
+            st.error(f" This recording is unavailable", icon="💔")
+        except MembersOnly:
+            st.error(f" This video is for channel members only", icon="💔")
+        except LiveStreamError:
+            st.error(f"This is a livestream, it cannot be downloaded", icon="💔")
+        except HTMLParseError as e:
             st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
+        except VideoUnavailable as e:
+            st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
+
+# Reddit downloader
+def reddit_download(media_type):
+    
+    # generate a persistent file name
+    output = file_name()
+
+    try:
+
+        # if the user wants to download a video
+        if media_type == "Video":
+
+            # download the video
+            video_object = RedDownloader.Download(url_from_user_reddit, output=f"{output}")
+
+            # if video is YouTube content, show error message as still figuring out a way to get this working
+            if "youtu.be" in video_object.postLink or "youtube.com" in video_object.postLink:
+                st.error(f"Please use the YouTube option...", icon="💔")
+
+            # if it's a Reddit video, display a download button
+            else:
+
+                # bar progress complete
+                bar.progress(100)
+
+                # create a download button for the user
+                with open(f"{output}.mp4", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
+        
+        # if the user wants only audio 
+        elif media_type == "Audio":
+
+            # grab the audio
+            RedDownloader.GetPostAudio(url_from_user_reddit, output=f"{output}")
+
+            # bar progress complete
+            bar.progress(100)
+
+            # create a download button for the user
+            with open(f"{output}.mp3", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime=f"{media_type.lower()}")
+        
+        # if the user is downloading a single image or a gallery of images
+        elif media_type == "Image":
+
+            # download the content and store the object
+            media = RedDownloader.Download(url_from_user_reddit, output=f"{output}")
+
+            # find out if it's a single image, gif or a gallery of images
+            media_info = media.GetMediaType()
+
+            # if it's an image
+            if media_info == "i":
+
+                # bar progress complete
+                bar.progress(100)
+
+                # create a download button for the user
+                with open(f"{output}.jpeg", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.jpeg", mime=f"{media_type.lower()}")
+
+            # if it's a gallery, iterate over the images and create a zip file for the user to download
+            elif media_info == "g":
+
+                # create a ZipFile object
+                with ZipFile(f"{output}.zip", 'w') as zipObj:
+
+                    # Iterate over all the files in directory
+                    for folderName, subfolders, filenames in os.walk(output):
+
+                        for filename in filenames:
+
+                            #create complete filepath of file in directory
+                            filePath = os.path.join(folderName, filename)
+
+                            # Add file to zip
+                            zipObj.write(filePath, basename(filePath))
+
+                # bar progress complete
+                bar.progress(100)
+
+                # create a download button for the user
+                with open(f"{output}.zip", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+                    
+            # if it's a gif
+            elif media_info == "gif":
+
+                # bar progress complete
+                bar.progress(100)
+
+                # create a download button for the user
+                with open(f"{output}.gif", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.gif", mime=f"{media_type.lower()}")
+            
+            else:
+
+                # throw a generic error
+                st.error(f"This link is currently unavailable to download...", icon="💔")
+
+    except Exception as e:
+        st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
 
 # main
 local_css("style.css")
 st.title('Grab it.')
 
-# create a form to capture URL and take user options
-with st.form("input", clear_on_submit=True):
+# define tabs
+tab1, tab2, tab3 = st.tabs(["YouTube", "Reddit", "Twitter"])
 
-    # get user URL with a text input box
-    url_from_user = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
+# YouTube tab
+with tab1:
 
-    # create a column layout
-    col1, col2 = st.columns([6.5, 1])
+    # create a form to capture URL and take user options
+    with st.form("input_youtube", clear_on_submit=True):
 
-    # create a selection drop down box
-    with col1:
-        selection = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+        # get user URL with a text input box
+        url_from_user_youtube = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
-    # create a sumbit button
-    with col2:
-        confirm_selection = st.form_submit_button("Submit")
+        # create a column layout
+        col1, col2 = st.columns([6.5, 1])
 
-try:
-    
-    # if there is input by the user
-    if confirm_selection:
+        # create a selection drop down box
+        with col1:
+            selection_youtube = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
 
-        # initialize a progress bar
-        bar = st.progress(0)
+        # create a sumbit button
+        with col2:
+            confirm_selection_youtube = st.form_submit_button("Submit")
 
-        # grab content and generate download button
-        youtube_download(selection)
+# Reddit tab
+with tab2:
 
-except Exception as e:
-            st.error(f"This link is currently unavailable to download...", icon="💔")
+    # create a form to capture URL and take user options
+    with st.form("input_reddit", clear_on_submit=True):
+
+        # get user URL with a text input box
+        url_from_user_reddit = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
+
+        # create a column layout
+        col1, col2 = st.columns([6.5, 1])
+
+        # create a selection drop down box
+        with col1:
+            selection_reddit = st.selectbox('Selection', ('Video', 'Audio', 'Image'), label_visibility="collapsed")
+
+        # create a sumbit button
+        with col2:
+            confirm_selection_reddit = st.form_submit_button("Submit")
+
+# Twitter tab
+with tab3:
+
+    # create a form to capture URL and take user options
+    with st.form("input_twitter", clear_on_submit=True):
+
+        # get user URL with a text input box
+        url_from_user_twitter = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
+
+        # create a column layout
+        col1, col2 = st.columns([6.5, 1])
+
+        # create a selection drop down box
+        with col1:
+            selection_twitter = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+
+        # create a sumbit button
+        with col2:
+            confirm_selection_twitter = st.form_submit_button("Submit")
+
+if __name__ == "__main__":
+
+    try:
+        
+        # if user submits YouTube button
+        if confirm_selection_youtube:
+
+            # if there is input in the URL field
+            if url_from_user_youtube:
+
+                # initialize a progress bar
+                bar = st.progress(0)
+
+                # grab content and generate download button
+                youtube_download(selection_youtube)
+            
+            # display generic error
+            else:
+                st.error(f"This link is currently unavailable to download...", icon="💔")
+
+        # if user submits Reddit button
+        elif confirm_selection_reddit:
+
+            # if there is input in the URL field
+            if url_from_user_reddit:
+
+                # initialize a progress bar
+                bar = st.progress(0)
+
+                # download media
+                reddit_download(selection_reddit)
+            
+            # display generic error
+            else:
+                st.error(f"This link is currently unavailable to download...", icon="💔")
+
+        # if user submits Twitter button
+        elif confirm_selection_twitter:
+
+            # if there is input in the URL field
+            if url_from_user_twitter:
+
+                # grab content and generate download button
+                st.info("Development in progress")
+            
+            # display generic error
+            else:
+                st.info("Development in progress")
+
+    except Exception as e:
+                st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
