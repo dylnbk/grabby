@@ -295,7 +295,7 @@ local_css("style.css")
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3 = st.tabs(["YouTube", "Reddit", "Twitter"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter"])
 
 # YouTube tab
 with tab1:
@@ -317,8 +317,48 @@ with tab1:
         with col2:
             confirm_selection_youtube = st.form_submit_button("Submit")
 
-# Reddit tab
+# Instagram tab
 with tab2:
+
+    # create a form to capture URL and take user options
+    with st.form("input_instagram", clear_on_submit=True):
+
+        # get user URL with a text input box
+        url_from_user_instagram = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
+
+        # create a column layout
+        col1, col2 = st.columns([6.5, 1])
+
+        # create a selection drop down box
+        with col1:
+            selection_instagram = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+
+        # create a sumbit button
+        with col2:
+            confirm_selection_instagram = st.form_submit_button("Submit")
+
+# TikTok tab
+with tab3:
+
+    # create a form to capture URL and take user options
+    with st.form("input_tiktok", clear_on_submit=True):
+
+        # get user URL with a text input box
+        url_from_user_tiktok = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
+
+        # create a column layout
+        col1, col2 = st.columns([6.5, 1])
+
+        # create a selection drop down box
+        with col1:
+            selection_tiktok = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+
+        # create a sumbit button
+        with col2:
+            confirm_selection_tiktok = st.form_submit_button("Submit")
+
+# Reddit tab
+with tab4:
 
     # create a form to capture URL and take user options
     with st.form("input_reddit", clear_on_submit=True):
@@ -338,7 +378,7 @@ with tab2:
             confirm_selection_reddit = st.form_submit_button("Submit")
 
 # Twitter tab
-with tab3:
+with tab5:
 
     # create a form to capture URL and take user options
     with st.form("input_twitter", clear_on_submit=True):
@@ -377,6 +417,32 @@ if __name__ == "__main__":
             else:
                 st.error(f"This link is currently unavailable to download...", icon="💔")
 
+        # if user submits Twitter button
+        elif confirm_selection_instagram:
+
+            # if there is input in the URL field
+            if url_from_user_instagram:
+
+                # grab content and generate download button
+                st.info("Development in progress")
+            
+            # display generic error
+            else:
+                st.info("Development in progress")
+
+        # if user submits Twitter button
+        elif confirm_selection_tiktok:
+
+            # if there is input in the URL field
+            if url_from_user_tiktok:
+
+                # grab content and generate download button
+                st.info("Development in progress")
+            
+            # display generic error
+            else:
+                st.info("Development in progress")
+        
         # if user submits Reddit button
         elif confirm_selection_reddit:
 
