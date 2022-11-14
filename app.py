@@ -107,9 +107,9 @@ def youtube_download(media_type):
         except LiveStreamError:
             st.error(f"This is a livestream, it cannot be downloaded", icon="💔")
         except HTMLParseError as e:
-            st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
+            st.error(f"This link is currently unavailable to download... \n\nHTMLParseError: {e}", icon="💔")
         except VideoUnavailable as e:
-            st.error(f"This link is currently unavailable to download... \n\nError: {e}", icon="💔")
+            st.error(f"This link is currently unavailable to download... \n\nVideoUnavailable: {e}", icon="💔")
     
     # if the user wants audio only
     elif media_type == "Audio":
