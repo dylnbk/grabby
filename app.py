@@ -26,17 +26,23 @@ st.set_page_config(
 
 # load & inject style sheet
 def local_css(file_name):
+
+    # write <style> tags to allow custom css
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # calculate progress bar
 def progress_func(stream, chunk, bytes_remaining):
+
+    # send stream size and bytes remaining to calculate the progress
     size = stream.filesize
     p = int((float(abs(bytes_remaining-size)/size))*float(100))
     bar.progress(p)
 
 # generate random file names
 def file_name():
+
+    # use uuid to create random strings, use .hex to get alphanumeric only
     result = str(uuid.uuid4().hex)
     return result
 
@@ -100,21 +106,9 @@ def youtube_download(media_type):
                 with open(f"{output}.{video_type}", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
         
-        # Try statements using pytube errors
-        except VideoPrivate:
-            st.error(" This video is private, you can't download it", icon="💔")
-        except RegexMatchError:
-            st.error(f" Invalid link format", icon="💔")
-        except RecordingUnavailable:
-            st.error(f" This recording is unavailable", icon="💔")
-        except MembersOnly:
-            st.error(f" This video is for channel members only", icon="💔")
-        except LiveStreamError:
-            st.error(f"This is a livestream, it cannot be downloaded", icon="💔")
-        except HTMLParseError as e:
-            st.error(f"This link is currently unavailable to download... \n\nHTMLParseError: {e}", icon="💔")
-        except VideoUnavailable as e:
-            st.error(f"This link is currently unavailable to download... \n\nVideoUnavailable: {e}", icon="💔")
+        # generic error
+        except Exception:
+            st.error(f"This link is currently unavailable to download...", icon="💔")
     
     # if the user wants audio only
     elif media_type == "Audio":
@@ -171,21 +165,9 @@ def youtube_download(media_type):
                 with open(f"{output}.mp3", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
-        # Try statements using pytube errors
-        except VideoPrivate:
-            st.error(" This video is private, you can't download it", icon="💔")
-        except RegexMatchError:
-            st.error(f" Invalid link format", icon="💔")
-        except RecordingUnavailable:
-            st.error(f" This recording is unavailable", icon="💔")
-        except MembersOnly:
-            st.error(f" This video is for channel members only", icon="💔")
-        except LiveStreamError:
-            st.error(f"This is a livestream, it cannot be downloaded", icon="💔")
-        except HTMLParseError as e:
-            st.error(f"This link is currently unavailable to download... \n\nHTMLParseError: {e}", icon="💔")
-        except VideoUnavailable as e:
-            st.error(f"This link is currently unavailable to download... \n\nVideoUnavailable: {e}", icon="💔")
+        # generic error
+        except Exception:
+            st.error(f"This link is currently unavailable to download...", icon="💔")
 
 # Instagram downloader
 def instagram_download(media_type):
@@ -196,10 +178,16 @@ def instagram_download(media_type):
     # Get instance
     L = instaloader.Instaloader(save_metadata=False)
 
-    if media_type == "Video" or media_type == "Image":
+    if media_type == "Post":
 
-        post = instaloader.Post.from_shortcode(L.context, url_from_user_instagram)
+        # basic URL formatting
+        temp_url = url_from_user_instagram.partition("/p/")[2]
+        url = "".join([temp_url[x] for x in range(0, 11)])
 
+        # store a post object
+        post = instaloader.Post.from_shortcode(L.context, url)
+
+        # download the post
         L.download_post(post, target=f"{output}")
 
         # create a ZipFile object
@@ -225,9 +213,14 @@ def instagram_download(media_type):
 
     elif media_type == "Profile":
 
-        # create a profile object
-        profile = instaloader.Profile.from_username(L.context, url_from_user_instagram)
+        # basic URL formatting
+        temp_url = url_from_user_instagram[:-1]
+        url = temp_url.partition(".com/")[2]
 
+        # create a profile object
+        profile = instaloader.Profile.from_username(L.context, url)
+
+        # get posts from profile
         posts = profile.get_posts()
 
         # iterate through 50 most recent posts on the profile and download them to a folder named f"{output}"
@@ -448,7 +441,7 @@ with tab2:
 
         # create a selection drop down box
         with col1:
-            selection_instagram = st.selectbox('Selection', ('Video', 'Image', 'Profile'), label_visibility="collapsed")
+            selection_instagram = st.selectbox('Selection', ('Post', 'Profile'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
@@ -530,10 +523,6 @@ if __name__ == "__main__":
 
                 # grab content and generate download button
                 youtube_download(selection_youtube)
-            
-            # display generic error
-            else:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
 
         # if user submits Instagram button
         elif confirm_selection_instagram:
@@ -546,10 +535,6 @@ if __name__ == "__main__":
 
                 # grab content and generate download button
                 instagram_download(selection_instagram)
-            
-            # display generic error
-            else:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
 
         # if user submits TikTok button
         elif confirm_selection_tiktok:
@@ -562,10 +547,6 @@ if __name__ == "__main__":
 
                 # grab content and generate download button
                 tiktok_download(selection_tiktok)
-            
-            # display generic error
-            else:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
         
         # if user submits Reddit button
         elif confirm_selection_reddit:
@@ -578,10 +559,6 @@ if __name__ == "__main__":
 
                 # download media
                 reddit_download(selection_reddit)
-            
-            # display generic error
-            else:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
 
         # if user submits Twitter button
         elif confirm_selection_twitter:
@@ -589,11 +566,11 @@ if __name__ == "__main__":
             # if there is input in the URL field
             if url_from_user_twitter:
 
+                # initialize a progress bar
+                bar = st.progress(0)
+
+                # call downloader
                 twitter_downloader()
-            
-            # display generic error
-            else:
-                st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
 
     except Exception as e:
-                st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
+                st.error(f"This link is currently unavailable to download...", icon="💔")
