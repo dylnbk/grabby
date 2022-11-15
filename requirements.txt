@@ -2,3 +2,7 @@ pytube
 streamlit
 ffmpeg-python
 RedDownloader
+instaloader
+pyktok
+browser-cookie3
+beautifulsoup4

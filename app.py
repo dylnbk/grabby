@@ -1,12 +1,18 @@
 import streamlit as st
 import os
 import uuid
+import json
+import requests
+import re
 import ffmpeg
-from os.path import basename
-from zipfile import ZipFile
+import instaloader
+import pyktok as pyk
 from pytube import YouTube
 from pytube.exceptions import *
 from RedDownloader import RedDownloader
+from os.path import basename
+from itertools import islice
+from zipfile import ZipFile
 
 # page configurations
 st.set_page_config(
@@ -95,7 +101,7 @@ def youtube_download(media_type):
                 with open(f"{output}.{video_type}", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
         
-        # Try statments using pytube errors
+        # Try statements using pytube errors
         except VideoPrivate:
             st.error(" This video is private, you can't download it", icon="💔")
         except RegexMatchError:
@@ -166,7 +172,7 @@ def youtube_download(media_type):
                 with open(f"{output}.mp3", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
-        # Try statments using pytube errors
+        # Try statements using pytube errors
         except VideoPrivate:
             st.error(" This video is private, you can't download it", icon="💔")
         except RegexMatchError:
@@ -181,6 +187,105 @@ def youtube_download(media_type):
             st.error(f"This link is currently unavailable to download... \n\nHTMLParseError: {e}", icon="💔")
         except VideoUnavailable as e:
             st.error(f"This link is currently unavailable to download... \n\nVideoUnavailable: {e}", icon="💔")
+
+# Instagram downloader
+def instagram_download(media_type):
+
+    # random file name
+    output = file_name()
+
+    # Get instance
+    L = instaloader.Instaloader(save_metadata=False)
+
+    if media_type == "Video" or media_type == "Image":
+
+        post = instaloader.Post.from_shortcode(L.context, url_from_user_instagram)
+
+        L.download_post(post, target=f"{output}")
+
+        # create a ZipFile object
+        with ZipFile(f"{output}.zip", 'w') as zipObj:
+
+            # Iterate over all the files in directory
+            for folderName, subfolders, filenames in os.walk(output):
+
+                for filename in filenames:
+
+                    #create complete filepath of file in directory
+                    filePath = os.path.join(folderName, filename)
+
+                    # Add file to zip
+                    zipObj.write(filePath, basename(filePath))
+
+        # bar progress complete
+        bar.progress(100)
+
+        # create a download button for the user
+        with open(f"{output}.zip", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+
+    elif media_type == "Profile":
+
+        # create a profile object
+        profile = instaloader.Profile.from_username(L.context, url_from_user_instagram)
+
+        posts = profile.get_posts()
+
+        # iterate through 50 most recent posts on the profile and download them to a folder named f"{output}"
+        for post in islice(posts, 0, 50):
+            L.download_post(post, target=f"{output}")
+
+        # create a ZipFile object
+        with ZipFile(f"{output}.zip", 'w') as zipObj:
+
+            # Iterate over all the files in directory
+            for folderName, subfolders, filenames in os.walk(output):
+
+                for filename in filenames:
+
+                    #create complete filepath of file in directory
+                    filePath = os.path.join(folderName, filename)
+
+                    # Add file to zip
+                    zipObj.write(filePath, basename(filePath))
+
+        # bar progress complete
+        bar.progress(100)
+
+        # create a download button for the user
+        with open(f"{output}.zip", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+
+# TikTok downloader
+def tiktok_download(media_type):
+
+    # create a random file name
+    output = file_name()
+
+    # if the user chooses a single video
+    if media_type == "Video":
+
+        # this section is copied from pytok to get the same file name convention
+        regex_url = re.findall('(?<=@)(.+?)(?=\?|$)', url_from_user_tiktok)[0]
+
+        # store the name of the video
+        video_fn = regex_url.replace('/','_') + '.mp4'
+
+        # download the video
+        pyk.save_tiktok(url_from_user_tiktok, True)
+
+        # bar progress complete
+        bar.progress(100)
+        
+        # create a download button for the user
+        with open(f"{video_fn}", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="Video")
+
+    # if the user wants to download the last 10 videos
+    elif media_type == "Profile":
+
+        st.info("Development in progress")
+
 
 # Reddit downloader
 def reddit_download(media_type):
@@ -331,7 +436,7 @@ with tab2:
 
         # create a selection drop down box
         with col1:
-            selection_instagram = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+            selection_instagram = st.selectbox('Selection', ('Video', 'Image', 'Profile'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
@@ -351,7 +456,7 @@ with tab3:
 
         # create a selection drop down box
         with col1:
-            selection_tiktok = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+            selection_tiktok = st.selectbox('Selection', ('Video', 'Profile'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
@@ -417,31 +522,37 @@ if __name__ == "__main__":
             else:
                 st.error(f"This link is currently unavailable to download...", icon="💔")
 
-        # if user submits Twitter button
+        # if user submits Instagram button
         elif confirm_selection_instagram:
 
             # if there is input in the URL field
             if url_from_user_instagram:
 
+                # initialize a progress bar
+                bar = st.progress(0)
+
                 # grab content and generate download button
-                st.info("Development in progress")
+                instagram_download(selection_instagram)
             
             # display generic error
             else:
-                st.info("Development in progress")
+                st.error(f"This link is currently unavailable to download...", icon="💔")
 
-        # if user submits Twitter button
+        # if user submits TikTok button
         elif confirm_selection_tiktok:
 
             # if there is input in the URL field
             if url_from_user_tiktok:
 
+                # initialize a progress bar
+                bar = st.progress(0)
+
                 # grab content and generate download button
-                st.info("Development in progress")
+                tiktok_download(selection_tiktok)
             
             # display generic error
             else:
-                st.info("Development in progress")
+                st.error(f"This link is currently unavailable to download...", icon="💔")
         
         # if user submits Reddit button
         elif confirm_selection_reddit:
