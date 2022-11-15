@@ -1,11 +1,15 @@
 import streamlit as st
 import os
 import uuid
+import json
+import requests
 import re
 import ffmpeg
 import instaloader
-import youtube_dl
 import pyktok as pyk
+import youtube_dl
+from pytube import YouTube
+from pytube.exceptions import *
 from RedDownloader import RedDownloader
 from os.path import basename
 from itertools import islice
@@ -41,24 +45,149 @@ def file_name():
 # YouTube downloader
 def youtube_download(media_type):
 
-    ydl_opts = {}
+    # grab YouTube datastream, on_progress_callback generates progress bar data
+    yt = YouTube(url_from_user_youtube, on_progress_callback=progress_func)
 
     # if the user wants full video
     if media_type == "Video":
 
         try:
                 
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url_from_user_youtube])
+            # filter adpative / progressive streams, adaptive = audio & video are seperated 
+            stream_adaptive = yt.streams.filter(adaptive=True)
+            stream_progressive = yt.streams.filter(progressive=True)
 
-        except Exception as e:
-            f"{e}"
+            # display users video
+            st.video(url_from_user_youtube)
 
+            # if it's a progressive stream, for now use this as it's the fastest option
+            if stream_progressive:
+
+                # grab the highest quality video 
+                video_stream = stream_progressive[-1]
+
+                # capture file type
+                video_type = video_stream.mime_type.partition("/")[2]
+
+                # create a download button for the user, can output directly with pytube download()
+                with open(video_stream.download(), "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+
+            # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
+            elif stream_adaptive:
+
+                # grab the highest quality video and audio stream
+                video_stream = stream_adaptive[0]
+                audio_stream = stream_adaptive[-1]
+
+                # capture the file type
+                audio_type = audio_stream.mime_type.partition("/")[2]
+                video_type = video_stream.mime_type.partition("/")[2]
+
+                # create media and store file path
+                video_path = video_stream.download(filename=f"{file_name()}.{video_type}")
+                audio_path = audio_stream.download(filename=f"{file_name()}.{audio_type}")
+
+                # prep ffmpeg merge with video and audio input
+                input_video = ffmpeg.input(video_path)
+                input_audio = ffmpeg.input(audio_path)
+
+                # random file name
+                output = file_name()
+
+                # merge the files into a single output
+                ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
+
+                # create a download button for the user
+                with open(f"{output}.{video_type}", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+        
+        # Try statements using pytube errors
+        except VideoPrivate:
+            st.error(" This video is private, you can't download it", icon="💔")
+        except RegexMatchError:
+            st.error(f" Invalid link format", icon="💔")
+        except RecordingUnavailable:
+            st.error(f" This recording is unavailable", icon="💔")
+        except MembersOnly:
+            st.error(f" This video is for channel members only", icon="💔")
+        except LiveStreamError:
+            st.error(f"This is a livestream, it cannot be downloaded", icon="💔")
+        except HTMLParseError as e:
+            st.error(f"This link is currently unavailable to download... \n\nHTMLParseError: {e}", icon="💔")
+        except VideoUnavailable as e:
+            st.error(f"This link is currently unavailable to download... \n\nVideoUnavailable: {e}", icon="💔")
+    
     # if the user wants audio only
     elif media_type == "Audio":
-        
-        pass
 
+        try:
+
+            # check for audio only streams
+            audio_stream = yt.streams.filter(only_audio=True)
+            
+            # if audio only is available convert to mp3 and provide download button
+            if audio_stream:
+
+                # display users video
+                st.video(url_from_user_youtube)
+
+                # create media and store file path
+                audio_path = audio_stream[-1].download(filename=f"{file_name()}")
+
+                # prep ffmpeg with input
+                input_audio = ffmpeg.input(audio_path)
+
+                # random file name
+                output = file_name()
+
+                # convert to mp3
+                ffmpeg.output(input_audio, f'{output}.mp3').run()
+                
+                # create a download button for the user, can output directly with pytube download()
+                with open(f"{output}.mp3", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
+
+            # if video only available, extract the audio
+            else:
+
+                # grab the highest quality stream
+                new_stream = yt.streams[-1]
+
+                # display users video
+                st.video(url_from_user_youtube)
+
+                # create media and store file path
+                video_path = new_stream.download(filename=f"video")
+
+                # prep ffmpeg with video input
+                input_video = ffmpeg.input(video_path)
+
+                # random file name
+                output = file_name()
+
+                # output the audio only
+                ffmpeg.output(input_video, f'{output}.mp3').run()
+
+                # create a download button for the user
+                with open(f"{output}.mp3", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
+
+        # Try statements using pytube errors
+        except VideoPrivate:
+            st.error(" This video is private, you can't download it", icon="💔")
+        except RegexMatchError:
+            st.error(f" Invalid link format", icon="💔")
+        except RecordingUnavailable:
+            st.error(f" This recording is unavailable", icon="💔")
+        except MembersOnly:
+            st.error(f" This video is for channel members only", icon="💔")
+        except LiveStreamError:
+            st.error(f"This is a livestream, it cannot be downloaded", icon="💔")
+        except HTMLParseError as e:
+            st.error(f"This link is currently unavailable to download... \n\nHTMLParseError: {e}", icon="💔")
+        except VideoUnavailable as e:
+            st.error(f"This link is currently unavailable to download... \n\nVideoUnavailable: {e}", icon="💔")
 
 # Instagram downloader
 def instagram_download(media_type):
