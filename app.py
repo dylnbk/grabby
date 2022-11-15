@@ -1,8 +1,6 @@
 import streamlit as st
 import os
 import uuid
-import json
-import requests
 import re
 import ffmpeg
 import instaloader
@@ -287,7 +285,6 @@ def tiktok_download(media_type):
 
         st.info("Development in progress")
 
-
 # Reddit downloader
 def reddit_download(media_type):
     
@@ -396,6 +393,20 @@ def reddit_download(media_type):
     except Exception as e:
         st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
 
+# Twitter downloader
+def twitter_downloader():
+    
+    output = file_name()
+
+    ydl_opts = {'outtmpl': f'{output}.mp4'}
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url_from_user_twitter])
+
+    # create a download button for the user
+    with open(f"{output}.mp4", "rb") as file:
+        st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="video")
+
 # main
 local_css("style.css")
 st.title('Grab it.')
@@ -497,12 +508,13 @@ with tab5:
 
         # create a selection drop down box
         with col1:
-            selection_twitter = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+            selection_twitter = st.selectbox('Selection', ('Video',), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
             confirm_selection_twitter = st.form_submit_button("Submit")
 
+# start script
 if __name__ == "__main__":
 
     try:
@@ -577,12 +589,11 @@ if __name__ == "__main__":
             # if there is input in the URL field
             if url_from_user_twitter:
 
-                # grab content and generate download button
-                st.info("Development in progress")
+                twitter_downloader()
             
             # display generic error
             else:
-                st.info("Development in progress")
+                st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
 
     except Exception as e:
                 st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
