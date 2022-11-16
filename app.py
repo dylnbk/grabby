@@ -264,7 +264,32 @@ def tiktok_download(media_type):
     # if the user wants to download the last 10 videos
     elif media_type == "Profile":
 
-        st.info("Development in progress")
+        file_names = []
+
+        tiktok_videos = pyk.get_account_video_urls(url_from_user_tiktok)
+
+        pyk.save_tiktok_multi(tiktok_videos)
+
+        for video_url in tiktok_videos:
+
+            regex_url = re.findall('(?<=@)(.+?)(?=\?|$)', video_url)[0]
+
+            file_names.append(regex_url.replace('/','_') + '.mp4')
+
+        # create a ZipFile object
+        with ZipFile(f"{output}.zip", 'w') as zipObj:
+
+            for file in file_names:
+
+                # Add file to zip
+                zipObj.write(file)
+
+        # bar progress complete
+        bar.progress(100)
+
+        # create a download button for the user
+        with open(f"{output}.zip", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
 
 # Reddit downloader
 def reddit_download(media_type):
@@ -374,16 +399,66 @@ def twitter_downloader():
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url_from_user_twitter])
 
+    # bar progress complete
+    bar.progress(100)
+
     # create a download button for the user
     with open(f"{output}.mp4", "rb") as file:
         st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="video")
+
+# Wild downloader - all yt-dlp supported sites
+def wild_downloader(media_type):
+
+    output = file_name()
+
+    if media_type == "Video":
+
+        ydl_opts = {'outtmpl': f'{output}.mp4'}
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url_from_user_wild])
+
+        # bar progress complete
+        bar.progress(100)
+
+        # create a download button for the user
+        with open(f"{output}.mp4", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="video")
+
+    elif media_type == "Audio":
+
+        ydl_opts = {'outtmpl': f'{output}.mp3'}
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url_from_user_wild])
+
+        # bar progress complete
+        bar.progress(100)
+
+        # create a download button for the user
+        with open(f"{output}.mp3", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{output}.mp3", mime="audio")
+
+    elif media_type == "Image":
+
+        ydl_opts = {'outtmpl': f'{output}.jpeg'}
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url_from_user_wild])
+
+        # bar progress complete
+        bar.progress(100)
+
+        # create a download button for the user
+        with open(f"{output}.jpeg", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{output}.jpeg", mime="image")
 
 # main
 local_css("style.css")
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Wild"])
 
 # YouTube tab
 with tab1:
@@ -485,6 +560,26 @@ with tab5:
         with col2:
             confirm_selection_twitter = st.form_submit_button("Submit")
 
+# Wild tab
+with tab6:
+
+    # create a form to capture URL and take user options
+    with st.form("input_wild", clear_on_submit=True):
+
+        # get user URL with a text input box
+        url_from_user_wild = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
+
+        # create a column layout
+        col1, col2 = st.columns([6.5, 1])
+
+        # create a selection drop down box
+        with col1:
+            selection_wild = st.selectbox('Selection', ('Video', 'Image', 'Audio'), label_visibility="collapsed")
+
+        # create a sumbit button
+        with col2:
+            confirm_selection_wild = st.form_submit_button("Submit")
+
 # start script
 if __name__ == "__main__":
 
@@ -549,6 +644,18 @@ if __name__ == "__main__":
 
                 # call downloader
                 twitter_downloader()
+
+        # if user submits Twitter button
+        elif confirm_selection_wild:
+
+            # if there is input in the URL field
+            if url_from_user_wild:
+
+                # initialize a progress bar
+                bar = st.progress(0)
+
+                # call downloader
+                wild_downloader(selection_wild)
 
     except Exception as e:
                 st.error(f"This link is currently unavailable to download...", icon="💔")
