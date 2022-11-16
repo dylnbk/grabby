@@ -54,120 +54,108 @@ def youtube_download(media_type):
 
     # if the user wants full video
     if media_type == "Video":
-
-        try:
                 
-            # filter adpative / progressive streams, adaptive = audio & video are seperated 
-            stream_adaptive = yt.streams.filter(adaptive=True)
-            stream_progressive = yt.streams.filter(progressive=True)
+        # filter adpative / progressive streams, adaptive = audio & video are seperated 
+        stream_adaptive = yt.streams.filter(adaptive=True)
+        stream_progressive = yt.streams.filter(progressive=True)
 
-            # display users video
-            st.video(url_from_user_youtube)
+        # display users video
+        st.video(url_from_user_youtube)
 
-            # if it's a progressive stream, for now use this as it's the fastest option
-            if stream_progressive:
+        # if it's a progressive stream, for now use this as it's the fastest option
+        if stream_progressive:
 
-                # grab the highest quality video 
-                video_stream = stream_progressive[-1]
+            # grab the highest quality video 
+            video_stream = stream_progressive[-1]
 
-                # capture file type
-                video_type = video_stream.mime_type.partition("/")[2]
+            # capture file type
+            video_type = video_stream.mime_type.partition("/")[2]
 
-                # create a download button for the user, can output directly with pytube download()
-                with open(video_stream.download(), "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+            # create a download button for the user, can output directly with pytube download()
+            with open(video_stream.download(), "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
 
-            # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
-            elif stream_adaptive:
+        # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
+        elif stream_adaptive:
 
-                # grab the highest quality video and audio stream
-                video_stream = stream_adaptive[0]
-                audio_stream = stream_adaptive[-1]
+            # grab the highest quality video and audio stream
+            video_stream = stream_adaptive[0]
+            audio_stream = stream_adaptive[-1]
 
-                # capture the file type
-                audio_type = audio_stream.mime_type.partition("/")[2]
-                video_type = video_stream.mime_type.partition("/")[2]
+            # capture the file type
+            audio_type = audio_stream.mime_type.partition("/")[2]
+            video_type = video_stream.mime_type.partition("/")[2]
 
-                # create media and store file path
-                video_path = video_stream.download(filename=f"{file_name()}.{video_type}")
-                audio_path = audio_stream.download(filename=f"{file_name()}.{audio_type}")
+            # create media and store file path
+            video_path = video_stream.download(filename=f"{file_name()}.{video_type}")
+            audio_path = audio_stream.download(filename=f"{file_name()}.{audio_type}")
 
-                # prep ffmpeg merge with video and audio input
-                input_video = ffmpeg.input(video_path)
-                input_audio = ffmpeg.input(audio_path)
+            # prep ffmpeg merge with video and audio input
+            input_video = ffmpeg.input(video_path)
+            input_audio = ffmpeg.input(audio_path)
 
-                # random file name
-                output = file_name()
+            # random file name
+            output = file_name()
 
-                # merge the files into a single output
-                ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
+            # merge the files into a single output
+            ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
 
-                # create a download button for the user
-                with open(f"{output}.{video_type}", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
-        
-        # generic error
-        except Exception:
-            st.error(f"This link is currently unavailable to download...", icon="💔")
+            # create a download button for the user
+            with open(f"{output}.{video_type}", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
     
     # if the user wants audio only
     elif media_type == "Audio":
 
-        try:
+        # check for audio only streams
+        audio_stream = yt.streams.filter(only_audio=True)
+        
+        # if audio only is available convert to mp3 and provide download button
+        if audio_stream:
 
-            # check for audio only streams
-            audio_stream = yt.streams.filter(only_audio=True)
+            # display users video
+            st.video(url_from_user_youtube)
+
+            # create media and store file path
+            audio_path = audio_stream[-1].download(filename=f"{file_name()}")
+
+            # prep ffmpeg with input
+            input_audio = ffmpeg.input(audio_path)
+
+            # random file name
+            output = file_name()
+
+            # convert to mp3
+            ffmpeg.output(input_audio, f'{output}.mp3').run()
             
-            # if audio only is available convert to mp3 and provide download button
-            if audio_stream:
+            # create a download button for the user, can output directly with pytube download()
+            with open(f"{output}.mp3", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
-                # display users video
-                st.video(url_from_user_youtube)
+        # if video only available, extract the audio
+        else:
 
-                # create media and store file path
-                audio_path = audio_stream[-1].download(filename=f"{file_name()}")
+            # grab the highest quality stream
+            new_stream = yt.streams[-1]
 
-                # prep ffmpeg with input
-                input_audio = ffmpeg.input(audio_path)
+            # display users video
+            st.video(url_from_user_youtube)
 
-                # random file name
-                output = file_name()
+            # create media and store file path
+            video_path = new_stream.download(filename=f"video")
 
-                # convert to mp3
-                ffmpeg.output(input_audio, f'{output}.mp3').run()
-                
-                # create a download button for the user, can output directly with pytube download()
-                with open(f"{output}.mp3", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
+            # prep ffmpeg with video input
+            input_video = ffmpeg.input(video_path)
 
-            # if video only available, extract the audio
-            else:
+            # random file name
+            output = file_name()
 
-                # grab the highest quality stream
-                new_stream = yt.streams[-1]
+            # output the audio only
+            ffmpeg.output(input_video, f'{output}.mp3').run()
 
-                # display users video
-                st.video(url_from_user_youtube)
-
-                # create media and store file path
-                video_path = new_stream.download(filename=f"video")
-
-                # prep ffmpeg with video input
-                input_video = ffmpeg.input(video_path)
-
-                # random file name
-                output = file_name()
-
-                # output the audio only
-                ffmpeg.output(input_video, f'{output}.mp3').run()
-
-                # create a download button for the user
-                with open(f"{output}.mp3", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
-
-        # generic error
-        except Exception:
-            st.error(f"This link is currently unavailable to download...", icon="💔")
+            # create a download button for the user
+            with open(f"{output}.mp3", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
 # Instagram downloader
 def instagram_download(media_type):
@@ -284,107 +272,97 @@ def reddit_download(media_type):
     # generate a persistent file name
     output = file_name()
 
-    try:
+    # if the user wants to download a video
+    if media_type == "Video":
 
-        # if the user wants to download a video
-        if media_type == "Video":
+        # download the video
+        video_object = RedDownloader.Download(url_from_user_reddit, output=f"{output}")
 
-            # download the video
-            video_object = RedDownloader.Download(url_from_user_reddit, output=f"{output}")
+        # if video is YouTube content, it will probably show error message as still figuring out a way to get this working
+        if "youtu.be" in video_object.postLink or "youtube.com" in video_object.postLink:
+            
+            # bar progress complete
+            bar.progress(100)
+            
+            # create a download button for the user
+            with open(f"{output}.mp4", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
 
-            # if video is YouTube content, show error message as still figuring out a way to get this working
-            if "youtu.be" in video_object.postLink or "youtube.com" in video_object.postLink:
-                
-                # bar progress complete
-                bar.progress(100)
-                
-                # create a download button for the user
-                with open(f"{output}.mp4", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
-
-            # if it's a Reddit video, display a download button
-            else:
-
-                # bar progress complete
-                bar.progress(100)
-
-                # create a download button for the user
-                with open(f"{output}.mp4", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
-        
-        # if the user wants only audio 
-        elif media_type == "Audio":
-
-            # grab the audio
-            RedDownloader.GetPostAudio(url_from_user_reddit, output=f"{output}")
+        # if it's a Reddit video, display a download button
+        else:
 
             # bar progress complete
             bar.progress(100)
 
             # create a download button for the user
-            with open(f"{output}.mp3", "rb") as file:
-                st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime=f"{media_type.lower()}")
-        
-        # if the user is downloading a single image or a gallery of images
-        elif media_type == "Image":
+            with open(f"{output}.mp4", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
+    
+    # if the user wants only audio 
+    elif media_type == "Audio":
 
-            # download the content and store the object
-            media = RedDownloader.Download(url_from_user_reddit, output=f"{output}")
+        # grab the audio
+        RedDownloader.GetPostAudio(url_from_user_reddit, output=f"{output}")
 
-            # find out if it's a single image, gif or a gallery of images
-            media_info = media.GetMediaType()
+        # bar progress complete
+        bar.progress(100)
 
-            # if it's an image
-            if media_info == "i":
+        # create a download button for the user
+        with open(f"{output}.mp3", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime=f"{media_type.lower()}")
+    
+    # if the user is downloading a single image or a gallery of images
+    elif media_type == "Image":
 
-                # bar progress complete
-                bar.progress(100)
+        # download the content and store the object
+        media = RedDownloader.Download(url_from_user_reddit, output=f"{output}")
 
-                # create a download button for the user
-                with open(f"{output}.jpeg", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.jpeg", mime=f"{media_type.lower()}")
+        # find out if it's a single image, gif or a gallery of images
+        media_info = media.GetMediaType()
 
-            # if it's a gallery, iterate over the images and create a zip file for the user to download
-            elif media_info == "g":
+        # if it's an image
+        if media_info == "i":
 
-                # create a ZipFile object
-                with ZipFile(f"{output}.zip", 'w') as zipObj:
+            # bar progress complete
+            bar.progress(100)
 
-                    # Iterate over all the files in directory
-                    for folderName, subfolders, filenames in os.walk(output):
+            # create a download button for the user
+            with open(f"{output}.jpeg", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.jpeg", mime=f"{media_type.lower()}")
 
-                        for filename in filenames:
+        # if it's a gallery, iterate over the images and create a zip file for the user to download
+        elif media_info == "g":
 
-                            #create complete filepath of file in directory
-                            filePath = os.path.join(folderName, filename)
+            # create a ZipFile object
+            with ZipFile(f"{output}.zip", 'w') as zipObj:
 
-                            # Add file to zip
-                            zipObj.write(filePath, basename(filePath))
+                # Iterate over all the files in directory
+                for folderName, subfolders, filenames in os.walk(output):
 
-                # bar progress complete
-                bar.progress(100)
+                    for filename in filenames:
 
-                # create a download button for the user
-                with open(f"{output}.zip", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
-                    
-            # if it's a gif
-            elif media_info == "gif":
+                        #create complete filepath of file in directory
+                        filePath = os.path.join(folderName, filename)
 
-                # bar progress complete
-                bar.progress(100)
+                        # Add file to zip
+                        zipObj.write(filePath, basename(filePath))
 
-                # create a download button for the user
-                with open(f"{output}.gif", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.gif", mime=f"{media_type.lower()}")
-            
-            else:
+            # bar progress complete
+            bar.progress(100)
 
-                # throw a generic error
-                st.error(f"This link is currently unavailable to download...", icon="💔")
+            # create a download button for the user
+            with open(f"{output}.zip", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+                
+        # if it's a gif
+        elif media_info == "gif":
 
-    except Exception as e:
-        st.error(f"This link is currently unavailable to download... \n\n{e}", icon="💔")
+            # bar progress complete
+            bar.progress(100)
+
+            # create a download button for the user
+            with open(f"{output}.gif", "rb") as file:
+                st.download_button("Download", data=file, file_name=f"{file_name()}.gif", mime=f"{media_type.lower()}")
 
 # Twitter downloader
 def twitter_downloader():
