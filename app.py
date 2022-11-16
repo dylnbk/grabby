@@ -158,7 +158,7 @@ def youtube_download(media_type):
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
 # Instagram downloader
-def instagram_download(media_type, number_of_posts):
+def instagram_download(media_type, number_of_posts_insta):
 
     # random file name
     output = file_name()
@@ -166,7 +166,7 @@ def instagram_download(media_type, number_of_posts):
     # Get instance
     L = instaloader.Instaloader(save_metadata=False)
 
-    if media_type == "Post":
+    if media_type == "Video" or media_type == "Image":
 
         # basic URL formatting
         temp_url = url_from_user_instagram.partition("/p/")[2]
@@ -212,10 +212,10 @@ def instagram_download(media_type, number_of_posts):
         posts = profile.get_posts()
 
         # if the user has input a specific # of posts to download
-        if number_of_posts > 0:
+        if number_of_posts_insta > 0:
 
             # iterate through user selected input and download them to a folder named f"{output}"
-            for post in islice(posts, 0, number_of_posts):
+            for post in islice(posts, 0, number_of_posts_insta):
                 L.download_post(post, target=f"{output}")
         
         else:
@@ -246,7 +246,7 @@ def instagram_download(media_type, number_of_posts):
             st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
 
 # TikTok downloader
-def tiktok_download(media_type):
+def tiktok_download(media_type, number_of_posts_tiktok):
 
     # create a random file name
     output = file_name()
@@ -273,12 +273,25 @@ def tiktok_download(media_type):
     # if the user wants to download the last 10 videos
     elif media_type == "Profile":
 
+        # array for file names
         file_names = []
 
+        # get up to 30 latest videos
         tiktok_videos = pyk.get_account_video_urls(url_from_user_tiktok)
 
+        # if the user provided a selection
+        if number_of_posts_tiktok > 0:
+
+            # while the amount of URLs are more than the users selection
+            while len(tiktok_videos) > number_of_posts_tiktok:
+
+                # remove excess URLs
+                tiktok_videos.pop()
+
+        # save the selected videos
         pyk.save_tiktok_multi(tiktok_videos)
 
+        # get a list of file names
         for video_url in tiktok_videos:
 
             regex_url = re.findall('(?<=@)(.+?)(?=\?|$)', video_url)[0]
@@ -564,14 +577,14 @@ with tab2:
 
         # create a selection drop down box
         with col1:
-            selection_instagram = st.selectbox('Selection', ('Post', 'Profile'), label_visibility="collapsed")
+            selection_instagram = st.selectbox('Selection', ('Video', 'Image', 'Profile'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
             confirm_selection_instagram = st.form_submit_button("Submit")
 
         # how many posts to download from profile
-        number_of_posts = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
+        number_of_posts_insta = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
 
 # TikTok tab
 with tab3:
@@ -592,6 +605,9 @@ with tab3:
         # create a sumbit button
         with col2:
             confirm_selection_tiktok = st.form_submit_button("Submit")
+
+        # how many posts to download from profile
+        number_of_posts_tiktok = st.number_input('Leave at zero to grab all posts:', min_value=0, max_value=30, label_visibility="collapsed")
 
 # Reddit tab
 with tab4:
@@ -680,7 +696,7 @@ if __name__ == "__main__":
                 bar = st.progress(0)
 
                 # grab content and generate download button
-                instagram_download(selection_instagram, number_of_posts)
+                instagram_download(selection_instagram, number_of_posts_insta)
 
         # if user submits TikTok button
         elif confirm_selection_tiktok:
@@ -692,7 +708,7 @@ if __name__ == "__main__":
                 bar = st.progress(0)
 
                 # grab content and generate download button
-                tiktok_download(selection_tiktok)
+                tiktok_download(selection_tiktok, number_of_posts_tiktok)
         
         # if user submits Reddit button
         elif confirm_selection_reddit:
@@ -718,7 +734,7 @@ if __name__ == "__main__":
                 # call downloader
                 twitter_downloader()
 
-        # if user submits Twitter button
+        # if user submits Surprise button
         elif confirm_selection_surprise:
 
             # if there is input in the URL field
