@@ -1,8 +1,8 @@
 # Download media
 
-A Streamlit powered front-end that uses a collection of modules to grab content from YouTube, Instagram, TikTok, Reddit & Twitter.
+A Streamlit powered front-end that uses a collection of packages to grab content from YouTube, Instagram, TikTok, Reddit & Twitter.
 
-### The modules doing all the hard work...
+### The packages doing all the hard work...
 
 #### Web Framework:
 - [Streamlit](https://streamlit.io/)
