@@ -158,7 +158,7 @@ def youtube_download(media_type):
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
 # Instagram downloader
-def instagram_download(media_type):
+def instagram_download(media_type, number_of_posts):
 
     # random file name
     output = file_name()
@@ -211,9 +211,18 @@ def instagram_download(media_type):
         # get posts from profile
         posts = profile.get_posts()
 
-        # iterate through 50 most recent posts on the profile and download them to a folder named f"{output}"
-        for post in islice(posts, 0, 50):
-            L.download_post(post, target=f"{output}")
+        # if the user has input a specific # of posts to download
+        if number_of_posts > 0:
+
+            # iterate through user selected input and download them to a folder named f"{output}"
+            for post in islice(posts, 0, number_of_posts):
+                L.download_post(post, target=f"{output}")
+        
+        else:
+
+            # iterate through all posts on profile and download them to a folder named f"{output}"
+            for post in posts:
+                L.download_post(post, target=f"{output}")
 
         # create a ZipFile object
         with ZipFile(f"{output}.zip", 'w') as zipObj:
@@ -406,8 +415,8 @@ def twitter_downloader():
     with open(f"{output}.mp4", "rb") as file:
         st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="video")
 
-# Wild downloader - all yt-dlp supported sites
-def wild_downloader(media_type):
+# Surprise downloader - all yt-dlp supported sites
+def surprise_downloader(media_type):
 
     output = file_name()
 
@@ -416,7 +425,7 @@ def wild_downloader(media_type):
         ydl_opts = {'outtmpl': f'{output}.mp4'}
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url_from_user_wild])
+            ydl.download([url_from_user_surprise])
 
         # bar progress complete
         bar.progress(100)
@@ -430,7 +439,7 @@ def wild_downloader(media_type):
         ydl_opts = {'outtmpl': f'{output}.mp3'}
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url_from_user_wild])
+            ydl.download([url_from_user_surprise])
 
         # bar progress complete
         bar.progress(100)
@@ -444,7 +453,7 @@ def wild_downloader(media_type):
         ydl_opts = {'outtmpl': f'{output}.jpeg'}
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url_from_user_wild])
+            ydl.download([url_from_user_surprise])
 
         # bar progress complete
         bar.progress(100)
@@ -458,7 +467,67 @@ local_css("style.css")
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Wild"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Surprise"])
+
+# create an info box
+with st.expander("See info"):
+
+    st.write("### Thanks for checking out Grabby!")
+
+    st.write("""
+        This website was made with Python, check out the drop down menu for the source.
+
+        Locally all features are working, an easy-to-install option will be available soon.
+        """)
+
+    st.write("***")
+
+    st.write("""
+        ##### YouTube
+        - Video (MP4) / Audio (MP3) download.
+        - Sadly, web version doesn't work for *every* video - in development.
+         """)
+    
+    st.write("***")
+
+    st.write("""
+        ##### Instagram
+        - Single post / Profile download.
+        - Sadly, web version doesn't work yet - in development.
+         """)
+
+    st.write("***")
+
+    st.write("""
+        ##### TikTok
+        - Single video / Profile download (last 30 videos).
+         """)
+
+    st.write("***")
+
+    st.write("""
+        ##### Reddit
+        - Video (MP4) / Audio (MP3) download (will convert videos to audio).
+        - Image (JPG) / Gallery download (will grab all images in a post).
+         """)
+
+    st.write("***")
+
+    st.write("""
+        ##### Twitter
+        - Video (MP4) download.
+         """)
+
+    st.write("***")
+
+    st.write("""
+        ##### Surprise
+        - You can grab from many different places.
+        - See [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) for a full list of supported websites.
+         """)
+
+    st.write("")
+    st.write("")
 
 # YouTube tab
 with tab1:
@@ -499,6 +568,9 @@ with tab2:
         # create a sumbit button
         with col2:
             confirm_selection_instagram = st.form_submit_button("Submit")
+
+        # how many posts to download from profile
+        number_of_posts = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
 
 # TikTok tab
 with tab3:
@@ -560,25 +632,25 @@ with tab5:
         with col2:
             confirm_selection_twitter = st.form_submit_button("Submit")
 
-# Wild tab
+# Surprise tab
 with tab6:
 
     # create a form to capture URL and take user options
-    with st.form("input_wild", clear_on_submit=True):
+    with st.form("input_surprise", clear_on_submit=True):
 
         # get user URL with a text input box
-        url_from_user_wild = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
+        url_from_user_surprise = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
         # create a column layout
         col1, col2 = st.columns([6.5, 1])
 
         # create a selection drop down box
         with col1:
-            selection_wild = st.selectbox('Selection', ('Video', 'Image', 'Audio'), label_visibility="collapsed")
+            selection_surprise = st.selectbox('Selection', ('Video', 'Image', 'Audio'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
-            confirm_selection_wild = st.form_submit_button("Submit")
+            confirm_selection_surprise = st.form_submit_button("Submit")
 
 # start script
 if __name__ == "__main__":
@@ -607,7 +679,7 @@ if __name__ == "__main__":
                 bar = st.progress(0)
 
                 # grab content and generate download button
-                instagram_download(selection_instagram)
+                instagram_download(selection_instagram, number_of_posts)
 
         # if user submits TikTok button
         elif confirm_selection_tiktok:
@@ -646,16 +718,16 @@ if __name__ == "__main__":
                 twitter_downloader()
 
         # if user submits Twitter button
-        elif confirm_selection_wild:
+        elif confirm_selection_surprise:
 
             # if there is input in the URL field
-            if url_from_user_wild:
+            if url_from_user_surprise:
 
                 # initialize a progress bar
                 bar = st.progress(0)
 
                 # call downloader
-                wild_downloader(selection_wild)
+                surprise_downloader(selection_surprise)
 
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
+                st.error(f"This link is currently unavailable to download...\n\n{e}\n\n{number_of_posts}", icon="💔")
