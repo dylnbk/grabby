@@ -2,10 +2,10 @@
 
 A Streamlit powered front-end that uses a collection of modules to grab content from YouTube, Instagram, TikTok, Reddit & Twitter.
 
+### The modules doing all the hard work...
+
 #### Web Framework:
 - [Streamlit](https://streamlit.io/)
-
-### The modules doing all the hard work...
 
 #### YouTube:
 - [pytube](https://pytube.io/)
