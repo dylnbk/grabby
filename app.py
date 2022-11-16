@@ -472,12 +472,12 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", 
 # create an info box
 with st.expander("See info"):
 
-    st.write("### Thanks for checking out Grabby!")
+    st.write("### Thanks for visiting Grabby!")
 
     st.write("""
-        This website was made with Python, check out the drop down menu for the source.
+        This website was made using Python, you can view the source [here](https://github.com/dylnbk/grabby).
 
-        Locally all features are working, an easy-to-install option will be available soon.
+        Unfortunately YouTube & Instagram only work correctly if you run this app locally.
         """)
 
     st.write("***")
@@ -485,7 +485,7 @@ with st.expander("See info"):
     st.write("""
         ##### YouTube
         - Video (MP4) / Audio (MP3) download.
-        - Sadly, web version doesn't work for *every* video - in development.
+        - Web version doesn't work for every video yet.
          """)
     
     st.write("***")
@@ -493,22 +493,23 @@ with st.expander("See info"):
     st.write("""
         ##### Instagram
         - Single post / Profile download.
-        - Sadly, web version doesn't work yet - in development.
+        - Web version doesn't work yet.
          """)
 
     st.write("***")
 
     st.write("""
         ##### TikTok
-        - Single video / Profile download (last 30 videos).
+        - Single video download.
+        - Profile download - up to last 30 videos.
          """)
 
     st.write("***")
 
     st.write("""
         ##### Reddit
-        - Video (MP4) / Audio (MP3) download (will convert videos to audio).
-        - Image (JPG) / Gallery download (will grab all images in a post).
+        - Video (MP4) / Audio (MP3) download - will convert videos to audio.
+        - Image (JPG) / Gallery download - will grab all images in a post.
          """)
 
     st.write("***")
