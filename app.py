@@ -731,4 +731,4 @@ if __name__ == "__main__":
                 surprise_downloader(selection_surprise)
 
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...\n\n{e}\n\n{number_of_posts}", icon="💔")
+                st.error(f"This link is currently unavailable to download...", icon="💔")
