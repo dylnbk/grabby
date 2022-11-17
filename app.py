@@ -49,11 +49,14 @@ def file_name():
 # YouTube downloader
 def youtube_download(media_type):
 
-    # grab YouTube datastream, on_progress_callback generates progress bar data
-    yt = YouTube(url_from_user_youtube, on_progress_callback=progress_func)
+    # random file name
+    output = file_name()
 
     # if the user wants full video
     if media_type == "Video":
+
+        # grab YouTube datastream, on_progress_callback generates progress bar data
+        yt = YouTube(url_from_user_youtube, on_progress_callback=progress_func)
                 
         # filter adpative / progressive streams, adaptive = audio & video are seperated 
         stream_adaptive = yt.streams.filter(adaptive=True)
@@ -94,9 +97,6 @@ def youtube_download(media_type):
             input_video = ffmpeg.input(video_path)
             input_audio = ffmpeg.input(audio_path)
 
-            # random file name
-            output = file_name()
-
             # merge the files into a single output
             ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
 
@@ -106,6 +106,9 @@ def youtube_download(media_type):
     
     # if the user wants audio only
     elif media_type == "Audio":
+
+        # grab YouTube datastream, on_progress_callback generates progress bar data
+        yt = YouTube(url_from_user_youtube)
 
         # check for audio only streams
         audio_stream = yt.streams.filter(only_audio=True)
@@ -122,11 +125,11 @@ def youtube_download(media_type):
             # prep ffmpeg with input
             input_audio = ffmpeg.input(audio_path)
 
-            # random file name
-            output = file_name()
-
             # convert to mp3
             ffmpeg.output(input_audio, f'{output}.mp3').run()
+
+            # bar progress complete
+            bar.progress(100)
             
             # create a download button for the user, can output directly with pytube download()
             with open(f"{output}.mp3", "rb") as file:
@@ -147,11 +150,11 @@ def youtube_download(media_type):
             # prep ffmpeg with video input
             input_video = ffmpeg.input(video_path)
 
-            # random file name
-            output = file_name()
-
             # output the audio only
             ffmpeg.output(input_video, f'{output}.mp3').run()
+
+            # bar progress complete
+            bar.progress(100)
 
             # create a download button for the user
             with open(f"{output}.mp3", "rb") as file:
@@ -480,7 +483,7 @@ local_css("style.css")
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Surprise"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Surprise ✨"])
 
 # create an info box
 with st.expander("See info"):
@@ -490,7 +493,7 @@ with st.expander("See info"):
     st.write("""
         This website was made using Python, you can view the source [here](https://github.com/dylnbk/grabby).
 
-        Unfortunately YouTube & Instagram only work correctly if you run this app locally.
+        Unfortunately the Insta-grabber only works if you run this app locally.
         """)
 
     st.write("***")
@@ -498,7 +501,7 @@ with st.expander("See info"):
     st.write("""
         ##### YouTube
         - Video (MP4) / Audio (MP3) download.
-        - Web version doesn't work for every video yet.
+        - Shorts (MP4) download.
          """)
     
     st.write("***")

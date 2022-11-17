@@ -36,5 +36,8 @@
     border: none;
     border-radius: 0px;
     border-bottom: solid 2px #414141a1;
+}
 
+footer {
+	visibility: hidden;
 }
