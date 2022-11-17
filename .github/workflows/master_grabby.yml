@@ -28,7 +28,7 @@ jobs:
           source venv/bin/activate
 
       - name: Install ffmpeg
-        run: apt-get install ffmpeg
+        run: sudo apt-get install ffmpeg
       
       - name: Install dependencies
         run: pip install -r requirements.txt
