@@ -483,7 +483,7 @@ local_css("style.css")
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Surprise ✨"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Surprise 🤞"])
 
 # create an info box
 with st.expander("See info"):
