@@ -542,7 +542,7 @@ with st.expander("See info"):
     st.write("""
         ##### Surprise
         - You can grab from many different places.
-        - See [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) for a full list of supported websites.
+        - For a full list of supported websites visit [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
          """)
 
     st.write("")
