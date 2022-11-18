@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import uuid
 import re
+import shutil
 import ffmpeg
 import instaloader
 import pyktok as pyk
@@ -63,6 +64,23 @@ def zip_files(file_name):
                     # Add file to zip
                     zipObj.write(filePath, basename(filePath))
 
+# delete files
+def delete_files(path):
+
+    # check if file or directory exists
+    if os.path.isfile(path) or os.path.islink(path):
+        
+        # remove file
+        os.remove(path)
+
+    elif os.path.isdir(path):
+
+        # remove directory and all its content
+        shutil.rmtree(path)
+
+    else:
+        raise ValueError("Path {} is not a file or dir.".format(path))
+
 # YouTube downloader
 def youtube_download(media_type):
 
@@ -91,9 +109,15 @@ def youtube_download(media_type):
             # capture file type
             video_type = video_stream.mime_type.partition("/")[2]
 
+            # create media and store file path
+            video_path = video_stream.download()
+
             # create a download button for the user, can output directly with pytube download()
-            with open(video_stream.download(), "rb") as file:
+            with open(video_path, "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+
+            # delete remaining files
+            delete_files(video_path)
 
         # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
         elif stream_adaptive:
@@ -120,6 +144,9 @@ def youtube_download(media_type):
             # create a download button for the user
             with open(f"{output}.{video_type}", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+
+            # delete remaining files
+            delete_files(f"{output}.{video_type}")
     
     # if the user wants audio only
     elif media_type == "Audio":
@@ -152,6 +179,9 @@ def youtube_download(media_type):
             with open(f"{output}.mp3", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
+            # delete remaining files
+            delete_files(f"{output}.mp3")
+
         # if video only available, extract the audio
         else:
 
@@ -176,6 +206,9 @@ def youtube_download(media_type):
             # create a download button for the user
             with open(f"{output}.mp3", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
+
+            # delete remaining files
+            delete_files(f"{output}.mp3")
 
 # Instagram downloader
 def instagram_download(media_type, number_of_posts_insta):
@@ -208,6 +241,11 @@ def instagram_download(media_type, number_of_posts_insta):
         with open(f"{output}.zip", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
 
+        # removing a files
+        delete_files(f"{output}.zip")
+        delete_files(output)
+        
+
     elif media_type == "Profile":
 
         # basic URL formatting
@@ -233,7 +271,7 @@ def instagram_download(media_type, number_of_posts_insta):
             for post in posts:
                 L.download_post(post, target=f"{output}")
 
-        # create a ZipFile object
+        # create a ZipFile 
         zip_files(output)
 
         # bar progress complete
@@ -242,6 +280,10 @@ def instagram_download(media_type, number_of_posts_insta):
         # create a download button for the user
         with open(f"{output}.zip", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+
+        # removing a files
+        delete_files(f"{output}.zip")
+        delete_files(output)
 
 # TikTok downloader
 def tiktok_download(media_type, number_of_posts_tiktok):
@@ -267,6 +309,9 @@ def tiktok_download(media_type, number_of_posts_tiktok):
         # create a download button for the user
         with open(f"{video_fn}", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="Video")
+
+        # delete remaining files
+        delete_files(video_fn)
 
     # if the user wants to download the last 10 videos
     elif media_type == "Profile":
@@ -311,6 +356,13 @@ def tiktok_download(media_type, number_of_posts_tiktok):
         with open(f"{output}.zip", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
 
+        # removing a files
+        for file in file_names:
+
+            delete_files(file)
+
+        delete_files(f"{output}.zip")
+
 # Reddit downloader
 def reddit_download(media_type):
     
@@ -333,6 +385,9 @@ def reddit_download(media_type):
             with open(f"{output}.mp4", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
 
+            # removing a files
+            delete_files(f"{output}.mp4")
+
         # if it's a Reddit video, display a download button
         else:
 
@@ -342,6 +397,9 @@ def reddit_download(media_type):
             # create a download button for the user
             with open(f"{output}.mp4", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
+
+            # removing a files
+            delete_files(f"{output}.mp4")
     
     # if the user wants only audio 
     elif media_type == "Audio":
@@ -355,6 +413,9 @@ def reddit_download(media_type):
         # create a download button for the user
         with open(f"{output}.mp3", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime=f"{media_type.lower()}")
+
+        # removing a files
+        delete_files(f"{output}.mp3")
     
     # if the user is downloading a single image or a gallery of images
     elif media_type == "Image":
@@ -375,6 +436,9 @@ def reddit_download(media_type):
             with open(f"{output}.jpeg", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.jpeg", mime=f"{media_type.lower()}")
 
+            # removing a files
+            delete_files(f"{output}.jpeg")
+
         # if it's a gallery, iterate over the images and create a zip file for the user to download
         elif media_info == "g":
 
@@ -387,6 +451,10 @@ def reddit_download(media_type):
             # create a download button for the user
             with open(f"{output}.zip", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+
+            # removing a files
+            delete_files(f"{output}.zip")
+            delete_files(output)
                 
         # if it's a gif
         elif media_info == "gif":
@@ -397,6 +465,9 @@ def reddit_download(media_type):
             # create a download button for the user
             with open(f"{output}.gif", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.gif", mime=f"{media_type.lower()}")
+
+            # removing a files
+            delete_files(f"{output}.gif")
 
 # Twitter downloader
 def twitter_downloader():
@@ -414,6 +485,9 @@ def twitter_downloader():
     # create a download button for the user
     with open(f"{output}.mp4", "rb") as file:
         st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="video")
+
+    # removing a files
+    delete_files(f"{output}.mp4")
 
 # Surprise downloader - all yt-dlp supported sites
 def surprise_downloader(media_type):
@@ -434,6 +508,9 @@ def surprise_downloader(media_type):
         with open(f"{output}.mp4", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="video")
 
+        # removing a files
+        delete_files(f"{output}.mp4")
+
     elif media_type == "Audio":
 
         ydl_opts = {'outtmpl': f'{output}.mp3'}
@@ -448,6 +525,9 @@ def surprise_downloader(media_type):
         with open(f"{output}.mp3", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{output}.mp3", mime="audio")
 
+        # removing a files
+        delete_files(f"{output}.mp3")
+
     elif media_type == "Image":
 
         ydl_opts = {'outtmpl': f'{output}.jpeg'}
@@ -461,6 +541,9 @@ def surprise_downloader(media_type):
         # create a download button for the user
         with open(f"{output}.jpeg", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{output}.jpeg", mime="image")
+
+        # removing a files
+        delete_files(f"{output}.jpeg")
 
 # main
 local_css("style.css")
