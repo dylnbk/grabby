@@ -1,6 +1,8 @@
 # Download media
 
-A Streamlit powered front-end that uses a collection of packages to grab content from YouTube, Instagram, TikTok, Reddit & Twitter.
+A Streamlit powered front-end that uses a collection of packages to grab content from YouTube, Instagram, TikTok, Reddit, Twitter & more.
+
+You can download a version that has been bundled into an .exe [here](https://link.storjshare.io/s/jwqdk7y7l2yjunmfrge4nhjvnugq/grabby/Grabby.zip).
 
 ### The packages doing all the hard work...
 
