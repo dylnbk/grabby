@@ -22,5 +22,5 @@ You can download a version that has been bundled into an .exe [here](https://lin
 #### Reddit:
 - [reddownloader](https://github.com/JackhammerYT/RedDownloader)
 
-#### Twitter / Surprise:
+#### Twitter / Lucky:
 - [youtube_dl](https://github.com/ytdl-org/youtube-dl)

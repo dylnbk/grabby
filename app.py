@@ -46,6 +46,23 @@ def file_name():
     result = str(uuid.uuid4().hex)
     return result
 
+# create a zip file
+def zip_files(file_name):
+
+    # create a ZipFile object
+        with ZipFile(f"{file_name}.zip", 'w') as zipObj:
+
+            # Iterate over all the files in directory
+            for folderName, subfolders, filenames in os.walk(file_name):
+
+                for filename in filenames:
+
+                    #create complete filepath of file in directory
+                    filePath = os.path.join(folderName, filename)
+
+                    # Add file to zip
+                    zipObj.write(filePath, basename(filePath))
+
 # YouTube downloader
 def youtube_download(media_type):
 
@@ -182,18 +199,7 @@ def instagram_download(media_type, number_of_posts_insta):
         L.download_post(post, target=f"{output}")
 
         # create a ZipFile object
-        with ZipFile(f"{output}.zip", 'w') as zipObj:
-
-            # Iterate over all the files in directory
-            for folderName, subfolders, filenames in os.walk(output):
-
-                for filename in filenames:
-
-                    #create complete filepath of file in directory
-                    filePath = os.path.join(folderName, filename)
-
-                    # Add file to zip
-                    zipObj.write(filePath, basename(filePath))
+        zip_files(output)
 
         # bar progress complete
         bar.progress(100)
@@ -228,18 +234,7 @@ def instagram_download(media_type, number_of_posts_insta):
                 L.download_post(post, target=f"{output}")
 
         # create a ZipFile object
-        with ZipFile(f"{output}.zip", 'w') as zipObj:
-
-            # Iterate over all the files in directory
-            for folderName, subfolders, filenames in os.walk(output):
-
-                for filename in filenames:
-
-                    #create complete filepath of file in directory
-                    filePath = os.path.join(folderName, filename)
-
-                    # Add file to zip
-                    zipObj.write(filePath, basename(filePath))
+        zip_files(output)
 
         # bar progress complete
         bar.progress(100)
@@ -384,18 +379,7 @@ def reddit_download(media_type):
         elif media_info == "g":
 
             # create a ZipFile object
-            with ZipFile(f"{output}.zip", 'w') as zipObj:
-
-                # Iterate over all the files in directory
-                for folderName, subfolders, filenames in os.walk(output):
-
-                    for filename in filenames:
-
-                        #create complete filepath of file in directory
-                        filePath = os.path.join(folderName, filename)
-
-                        # Add file to zip
-                        zipObj.write(filePath, basename(filePath))
+            zip_files(output)
 
             # bar progress complete
             bar.progress(100)
@@ -483,7 +467,7 @@ local_css("style.css")
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Surprise 🤞"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Lucky 🤞"])
 
 # create an info box
 with st.expander("See info"):
@@ -540,7 +524,7 @@ with st.expander("See info"):
     st.write("***")
 
     st.write("""
-        ##### Surprise
+        ##### Lucky
         - You can grab from many different places.
         - For a full list of supported websites visit [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
          """)
