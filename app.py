@@ -493,7 +493,9 @@ with st.expander("See info"):
     st.write("""
         This website was made using Python, you can view the source [here](https://github.com/dylnbk/grabby).
 
-        Unfortunately the Insta-grabber only works if you run this app locally.
+        Unfortunately the Insta-grabber only works correctly if you run this app locally.
+        
+        You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jwqdk7y7l2yjunmfrge4nhjvnugq/grabby/Grabby.zip).
         """)
 
     st.write("***")
@@ -509,7 +511,7 @@ with st.expander("See info"):
     st.write("""
         ##### Instagram
         - Single post / Profile download.
-        - Web version doesn't work yet.
+        - Web version doesn't always work.
          """)
 
     st.write("***")
