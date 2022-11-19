@@ -8,7 +8,7 @@ import instaloader
 import pyktok as pyk
 import youtube_dl
 from pytube import YouTube
-from pytube.exceptions import *
+from pytube import Playlist
 from RedDownloader import RedDownloader
 from os.path import basename
 from itertools import islice
@@ -82,7 +82,7 @@ def delete_files(path):
         raise ValueError("Path {} is not a file or dir.".format(path))
 
 # YouTube downloader
-def youtube_download(media_type):
+def youtube_download(media_type, number_of_posts_youtube):
 
     # random file name
     output = file_name()
@@ -201,6 +201,17 @@ def youtube_download(media_type):
             # delete remaining files
             delete_files(f"{output}.mp3")
             delete_files(video_path)
+
+    # if the user wants to download a video playlist
+    elif media_type == "Video Playlist":
+        
+        p = Playlist(url_from_user_youtube)
+
+
+
+    # if the user wants to download an audio only playlist
+    elif media_type == "Audio Playlist":
+        pass
 
 # Instagram downloader
 def instagram_download(media_type, number_of_posts_insta):
@@ -520,6 +531,7 @@ with st.expander("See info"):
     st.write("""
         ##### YouTube
         - Video (MP4) / Audio (MP3) download.
+        - Video (MP4) / Audio (MP3) playlist download.
         - Shorts (MP4) download.
          """)
     
@@ -584,6 +596,9 @@ with tab1:
         # create a sumbit button
         with col2:
             confirm_selection_youtube = st.form_submit_button("Submit")
+
+        # how many posts to download from profile
+        number_of_posts_youtube = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
 
 # Instagram tab
 with tab2:
@@ -705,7 +720,7 @@ if __name__ == "__main__":
                 with st.spinner(''):
 
                     # grab content and generate download button
-                    youtube_download(selection_youtube)
+                    youtube_download(selection_youtube, number_of_posts_youtube)
 
         # if user submits Instagram button
         elif confirm_selection_instagram:
