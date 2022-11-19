@@ -4,7 +4,7 @@ A Streamlit powered front-end that uses a collection of packages to grab content
 
 You can download a version that has been bundled into an .exe [here](https://link.storjshare.io/s/jwqdk7y7l2yjunmfrge4nhjvnugq/grabby/Grabby.zip).
 
-Web Version can be used @ [grabby.page](https://grabby.page/) and [grabby.streamlit.app](https://grabby.streamlit.app/).
+Web version can be used @ [grabby.page](https://grabby.page/) and [grabby.streamlit.app](https://grabby.streamlit.app/).
 
 ### The packages doing all the hard work...
 
@@ -13,7 +13,7 @@ Web Version can be used @ [grabby.page](https://grabby.page/) and [grabby.stream
 
 #### YouTube:
 - [pytube](https://pytube.io/)
-- [ffmpeg](https://github.com/FFmpeg/FFmpeg) - ffmpeg must be installed and a copy of ffmpeg.exe 
+- [ffmpeg](https://github.com/FFmpeg/FFmpeg) - ffmpeg must be installed and a copy of ffmpeg.exe stored alongside app.py.
 
 #### Instagram:
 - [instaloader](https://instaloader.github.io/)
