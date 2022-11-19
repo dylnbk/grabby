@@ -33,12 +33,12 @@ def local_css(file_name):
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # calculate progress bar
-def progress_func(stream, chunk, bytes_remaining):
-
-    # send stream size and bytes remaining to calculate the progress
-    size = stream.filesize
-    p = int((float(abs(bytes_remaining-size)/size))*float(100))
-    bar.progress(p)
+# def progress_func(stream, chunk, bytes_remaining):
+# 
+#     # send stream size and bytes remaining to calculate the progress
+#     size = stream.filesize
+#     p = int((float(abs(bytes_remaining-size)/size))*float(100))
+#     bar.progress(p)
 
 # generate random file names
 def file_name():
@@ -91,14 +91,11 @@ def youtube_download(media_type):
     if media_type == "Video":
 
         # grab YouTube datastream, on_progress_callback generates progress bar data
-        yt = YouTube(url_from_user_youtube, on_progress_callback=progress_func)
+        yt = YouTube(url_from_user_youtube)
                 
         # filter adpative / progressive streams, adaptive = audio & video are seperated 
         stream_adaptive = yt.streams.filter(adaptive=True)
         stream_progressive = yt.streams.filter(progressive=True)
-
-        # display users video
-        st.video(url_from_user_youtube)
 
         # if it's a progressive stream, for now use this as it's the fastest option
         if stream_progressive:
@@ -147,6 +144,8 @@ def youtube_download(media_type):
 
             # delete remaining files
             delete_files(f"{output}.{video_type}")
+            delete_files(video_path)
+            delete_files(audio_path)
     
     # if the user wants audio only
     elif media_type == "Audio":
@@ -160,9 +159,6 @@ def youtube_download(media_type):
         # if audio only is available convert to mp3 and provide download button
         if audio_stream:
 
-            # display users video
-            st.video(url_from_user_youtube)
-
             # create media and store file path
             audio_path = audio_stream[-1].download(filename=f"{file_name()}")
 
@@ -171,9 +167,6 @@ def youtube_download(media_type):
 
             # convert to mp3
             ffmpeg.output(input_audio, f'{output}.mp3').run()
-
-            # bar progress complete
-            bar.progress(100)
             
             # create a download button for the user, can output directly with pytube download()
             with open(f"{output}.mp3", "rb") as file:
@@ -181,6 +174,7 @@ def youtube_download(media_type):
 
             # delete remaining files
             delete_files(f"{output}.mp3")
+            delete_files(audio_path)
 
         # if video only available, extract the audio
         else:
@@ -200,15 +194,13 @@ def youtube_download(media_type):
             # output the audio only
             ffmpeg.output(input_video, f'{output}.mp3').run()
 
-            # bar progress complete
-            bar.progress(100)
-
             # create a download button for the user
             with open(f"{output}.mp3", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp3", mime="audio")
 
             # delete remaining files
             delete_files(f"{output}.mp3")
+            delete_files(video_path)
 
 # Instagram downloader
 def instagram_download(media_type, number_of_posts_insta):
@@ -233,9 +225,6 @@ def instagram_download(media_type, number_of_posts_insta):
 
         # create a ZipFile object
         zip_files(output)
-
-        # bar progress complete
-        bar.progress(100)
 
         # create a download button for the user
         with open(f"{output}.zip", "rb") as file:
@@ -274,9 +263,6 @@ def instagram_download(media_type, number_of_posts_insta):
         # create a ZipFile 
         zip_files(output)
 
-        # bar progress complete
-        bar.progress(100)
-
         # create a download button for the user
         with open(f"{output}.zip", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
@@ -302,9 +288,6 @@ def tiktok_download(media_type, number_of_posts_tiktok):
 
         # download the video
         pyk.save_tiktok(url_from_user_tiktok, True)
-
-        # bar progress complete
-        bar.progress(100)
         
         # create a download button for the user
         with open(f"{video_fn}", "rb") as file:
@@ -349,9 +332,6 @@ def tiktok_download(media_type, number_of_posts_tiktok):
                 # Add file to zip
                 zipObj.write(file)
 
-        # bar progress complete
-        bar.progress(100)
-
         # create a download button for the user
         with open(f"{output}.zip", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
@@ -378,9 +358,6 @@ def reddit_download(media_type):
         # if video is YouTube content, it will probably show error message as still figuring out a way to get this working
         if "youtu.be" in video_object.postLink or "youtube.com" in video_object.postLink:
             
-            # bar progress complete
-            bar.progress(100)
-            
             # create a download button for the user
             with open(f"{output}.mp4", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime=f"{media_type.lower()}")
@@ -390,9 +367,6 @@ def reddit_download(media_type):
 
         # if it's a Reddit video, display a download button
         else:
-
-            # bar progress complete
-            bar.progress(100)
 
             # create a download button for the user
             with open(f"{output}.mp4", "rb") as file:
@@ -406,9 +380,6 @@ def reddit_download(media_type):
 
         # grab the audio
         RedDownloader.GetPostAudio(url_from_user_reddit, output=f"{output}")
-
-        # bar progress complete
-        bar.progress(100)
 
         # create a download button for the user
         with open(f"{output}.mp3", "rb") as file:
@@ -429,9 +400,6 @@ def reddit_download(media_type):
         # if it's an image
         if media_info == "i":
 
-            # bar progress complete
-            bar.progress(100)
-
             # create a download button for the user
             with open(f"{output}.jpeg", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.jpeg", mime=f"{media_type.lower()}")
@@ -445,9 +413,6 @@ def reddit_download(media_type):
             # create a ZipFile object
             zip_files(output)
 
-            # bar progress complete
-            bar.progress(100)
-
             # create a download button for the user
             with open(f"{output}.zip", "rb") as file:
                 st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
@@ -458,9 +423,6 @@ def reddit_download(media_type):
                 
         # if it's a gif
         elif media_info == "gif":
-
-            # bar progress complete
-            bar.progress(100)
 
             # create a download button for the user
             with open(f"{output}.gif", "rb") as file:
@@ -478,9 +440,6 @@ def twitter_downloader():
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url_from_user_twitter])
-
-    # bar progress complete
-    bar.progress(100)
 
     # create a download button for the user
     with open(f"{output}.mp4", "rb") as file:
@@ -501,9 +460,6 @@ def surprise_downloader(media_type):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
-        # bar progress complete
-        bar.progress(100)
-
         # create a download button for the user
         with open(f"{output}.mp4", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="video")
@@ -518,9 +474,6 @@ def surprise_downloader(media_type):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
-        # bar progress complete
-        bar.progress(100)
-
         # create a download button for the user
         with open(f"{output}.mp3", "rb") as file:
             st.download_button("Download", data=file, file_name=f"{output}.mp3", mime="audio")
@@ -534,9 +487,6 @@ def surprise_downloader(media_type):
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
-
-        # bar progress complete
-        bar.progress(100)
 
         # create a download button for the user
         with open(f"{output}.jpeg", "rb") as file:
@@ -751,12 +701,11 @@ if __name__ == "__main__":
 
             # if there is input in the URL field
             if url_from_user_youtube:
+                
+                with st.spinner(''):
 
-                # initialize a progress bar
-                bar = st.progress(0)
-
-                # grab content and generate download button
-                youtube_download(selection_youtube)
+                    # grab content and generate download button
+                    youtube_download(selection_youtube)
 
         # if user submits Instagram button
         elif confirm_selection_instagram:
@@ -764,11 +713,10 @@ if __name__ == "__main__":
             # if there is input in the URL field
             if url_from_user_instagram:
 
-                # initialize a progress bar
-                bar = st.progress(0)
+                with st.spinner(''):
 
-                # grab content and generate download button
-                instagram_download(selection_instagram, number_of_posts_insta)
+                    # grab content and generate download button
+                    instagram_download(selection_instagram, number_of_posts_insta)
 
         # if user submits TikTok button
         elif confirm_selection_tiktok:
@@ -776,11 +724,9 @@ if __name__ == "__main__":
             # if there is input in the URL field
             if url_from_user_tiktok:
 
-                # initialize a progress bar
-                bar = st.progress(0)
-
-                # grab content and generate download button
-                tiktok_download(selection_tiktok, number_of_posts_tiktok)
+                with st.spinner(''):
+                    # grab content and generate download button
+                    tiktok_download(selection_tiktok, number_of_posts_tiktok)
         
         # if user submits Reddit button
         elif confirm_selection_reddit:
@@ -788,11 +734,10 @@ if __name__ == "__main__":
             # if there is input in the URL field
             if url_from_user_reddit:
 
-                # initialize a progress bar
-                bar = st.progress(0)
+                with st.spinner(''):
 
-                # download media
-                reddit_download(selection_reddit)
+                    # download media
+                    reddit_download(selection_reddit)
 
         # if user submits Twitter button
         elif confirm_selection_twitter:
@@ -800,11 +745,10 @@ if __name__ == "__main__":
             # if there is input in the URL field
             if url_from_user_twitter:
 
-                # initialize a progress bar
-                bar = st.progress(0)
+                with st.spinner(''):
 
-                # call downloader
-                twitter_downloader()
+                    # call downloader
+                    twitter_downloader()
 
         # if user submits Surprise button
         elif confirm_selection_surprise:
@@ -812,11 +756,10 @@ if __name__ == "__main__":
             # if there is input in the URL field
             if url_from_user_surprise:
 
-                # initialize a progress bar
-                bar = st.progress(0)
+                with st.spinner(''):
 
-                # call downloader
-                surprise_downloader(selection_surprise)
+                    # call downloader
+                    surprise_downloader(selection_surprise)
 
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
+                st.error(f"This link is currently unavailable to download...\n\n{e}", icon="💔")
