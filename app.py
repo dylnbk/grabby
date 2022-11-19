@@ -205,8 +205,8 @@ def youtube_download(media_type, number_of_posts_youtube):
     # if the user wants to download a video playlist
     elif media_type == "Video Playlist":
         
-        p = Playlist(url_from_user_youtube)
-
+        #p = Playlist(url_from_user_youtube)
+        pass
 
 
     # if the user wants to download an audio only playlist
