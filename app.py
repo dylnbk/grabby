@@ -717,7 +717,7 @@ if __name__ == "__main__":
                 with st.spinner(''):
 
                     # grab content and generate download button
-                    youtube_download(selection_youtube, number_of_posts_youtube)
+                    youtube_download(selection_youtube)
 
         # if user submits Instagram button
         elif confirm_selection_instagram:
