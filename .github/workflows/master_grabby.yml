@@ -61,9 +61,3 @@ jobs:
           app-name: 'grabby'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8C7CE30C771A4D71909028FA397C4C87 }}
-
-      - name: Install ffmpeg
-        run: |
-          cd ../../../..
-          cd /home/site/wwwroot
-          sudo apt-get install ffmpeg
