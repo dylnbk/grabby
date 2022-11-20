@@ -79,7 +79,7 @@ def delete_files(path):
         shutil.rmtree(path)
 
 # YouTube downloader
-def youtube_download(media_type, number_of_posts_youtube):
+def youtube_download(media_type):
 
     # random file name
     output = file_name()
