@@ -595,7 +595,7 @@ with tab1:
             confirm_selection_youtube = st.form_submit_button("Submit")
 
         # how many posts to download from profile
-        number_of_posts_youtube = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
+        # number_of_posts_youtube = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
 
 # Instagram tab
 with tab2:
@@ -774,4 +774,4 @@ if __name__ == "__main__":
                     surprise_downloader(selection_surprise)
 
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
+                st.error(f"This link is currently unavailable to download...\n\n{e}", icon="💔")
