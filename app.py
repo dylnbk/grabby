@@ -78,9 +78,6 @@ def delete_files(path):
         # remove directory and all its content
         shutil.rmtree(path)
 
-    else:
-        raise ValueError("Path {} is not a file or dir.".format(path))
-
 # YouTube downloader
 def youtube_download(media_type, number_of_posts_youtube):
 
@@ -777,4 +774,4 @@ if __name__ == "__main__":
                     surprise_downloader(selection_surprise)
 
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...\n\n{e}", icon="💔")
+                st.error(f"This link is currently unavailable to download...", icon="💔")
