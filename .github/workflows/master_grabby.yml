@@ -29,8 +29,6 @@ jobs:
 
       - name: Create and start virtual environment
         run: |
-          cd ../../../..
-          cd /home/site/wwwroot
           apt-get install ffmpeg
       
       - name: Install dependencies
