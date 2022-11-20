@@ -65,5 +65,5 @@ jobs:
       - name: Install ffmpeg
         run: |
           cd ../../../..
-          cd /site/wwwroot
+          cd /home/site/wwwroot
           sudo apt-get install ffmpeg
