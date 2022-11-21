@@ -79,7 +79,7 @@ def delete_files(path):
         shutil.rmtree(path)
 
 # YouTube downloader
-def youtube_download(media_type):
+def youtube_download(media_type, number_of_posts_youtube):
 
     # random file name
     output = file_name()
@@ -179,9 +179,6 @@ def youtube_download(media_type):
             # grab the highest quality stream
             new_stream = yt.streams[-1]
 
-            # display users video
-            st.video(url_from_user_youtube)
-
             # create media and store file path
             video_path = new_stream.download(filename=f"video")
 
@@ -199,16 +196,40 @@ def youtube_download(media_type):
             delete_files(f"{output}.mp3")
             delete_files(video_path)
 
-    # if the user wants to download a video playlist
-    elif media_type == "Video Playlist":
-        
-        #p = Playlist(url_from_user_youtube)
-        pass
-
-
-    # if the user wants to download an audio only playlist
-    elif media_type == "Audio Playlist":
-        pass
+#    # if the user wants to download a video playlist
+#    elif media_type == "Video Playlist":
+#        
+#        p = Playlist(url_from_user_youtube)
+#
+#        for count, video in enumerate(p.videos):
+#
+#            if count < number_of_posts_youtube:
+#
+#                if video.streams.filter(progressive=True):
+#
+#                    st.write(video.streams.filter(progressive=True)[-1])
+#
+#                elif video.streams.filter(adaptive=True):
+#
+#                    st.write(video.streams.filter(adaptive=True)[0])
+#                    st.write(video.streams.filter(adaptive=True)[-1])
+#
+#    # if the user wants to download an audio only playlist
+#    elif media_type == "Audio Playlist":
+#
+#        p = Playlist(url_from_user_youtube)
+#
+#        for count, video in enumerate(p.videos):
+#
+#            if count < number_of_posts_youtube:
+#
+#                if video.streams.filter(only_audio=True):
+#
+#                    st.write(video.streams.filter(only_audio=True)[-1])
+#
+#                else:
+#
+#                    st.write(video.streams)
 
 # Instagram downloader
 def instagram_download(media_type, number_of_posts_insta):
@@ -289,7 +310,7 @@ def tiktok_download(media_type, number_of_posts_tiktok):
     if media_type == "Video":
 
         # this section is copied from pytok to get the same file name convention
-        regex_url = re.findall('(?<=@)(.+?)(?=\?|$)', url_from_user_tiktok)[0]
+        regex_url = re.findall(r'(?<=@)(.+?)(?=\?|$)', url_from_user_tiktok)[0]
 
         # store the name of the video
         video_fn = regex_url.replace('/','_') + '.mp4'
@@ -328,7 +349,7 @@ def tiktok_download(media_type, number_of_posts_tiktok):
         # get a list of file names
         for video_url in tiktok_videos:
 
-            regex_url = re.findall('(?<=@)(.+?)(?=\?|$)', video_url)[0]
+            regex_url = re.findall(r'(?<=@)(.+?)(?=\?|$)', video_url)[0]
 
             file_names.append(regex_url.replace('/','_') + '.mp4')
 
@@ -588,14 +609,14 @@ with tab1:
 
         # create a selection drop down box
         with col1:
-            selection_youtube = st.selectbox('Selection', ('Video', 'Audio'), label_visibility="collapsed")
+            selection_youtube = st.selectbox('Selection', ('Video', 'Audio', 'Channel', 'Video Playlist', 'Audio Playlist'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
             confirm_selection_youtube = st.form_submit_button("Submit")
 
         # how many posts to download from profile
-        # number_of_posts_youtube = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
+        number_of_posts_youtube = st.number_input('Leave at zero to grab entire playlist:', min_value=0, label_visibility="collapsed")
 
 # Instagram tab
 with tab2:
@@ -717,7 +738,7 @@ if __name__ == "__main__":
                 with st.spinner(''):
 
                     # grab content and generate download button
-                    youtube_download(selection_youtube)
+                    youtube_download(selection_youtube, number_of_posts_youtube)
 
         # if user submits Instagram button
         elif confirm_selection_instagram:
@@ -774,4 +795,4 @@ if __name__ == "__main__":
                     surprise_downloader(selection_surprise)
 
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...\n\n{e}", icon="💔")
+                st.error(f"This link is currently unavailable to download...", icon="💔")
