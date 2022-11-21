@@ -657,7 +657,7 @@ with tab4:
 
         # create a selection drop down box
         with col1:
-            selection_reddit = st.selectbox('Selection', ('Video', 'Audio', 'Image'), label_visibility="collapsed")
+            selection_reddit = st.selectbox('Selection', ('Video', 'Image', 'Audio'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
