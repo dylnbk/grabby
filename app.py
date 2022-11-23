@@ -61,47 +61,88 @@ def delete_files(path):
         shutil.rmtree(path)
 
 # YouTube video helper
-def video_processor(video):
+def video_processor(video, quality):
 
     # generate a persistent file name
     video_name = file_name()
 
-    # if there is a video & audio merged stream available
-    if video.streams.filter(progressive=True):
+    if quality:
 
-        # capture file type
-        video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
+        # if there is only seperate video and audio streams available
+        if video.streams.filter(adaptive=True):
 
-        # download media
-        video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
+            # capture file types
+            audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
+            video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
 
-        # return the file name
-        return f"{video_name}.{video_type}"
+            # download media and store file paths
+            audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
+            video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
 
-    # if there is only seperate video and audio streams available
-    elif video.streams.filter(adaptive=True):
+            # prep ffmpeg merge with video and audio input
+            input_video = ffmpeg.input(video_path)
+            input_audio = ffmpeg.input(audio_path)
+            
+            # merge the files into a single output
+            ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
 
-        # capture file types
-        audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
-        video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
+            # remove unrequired files
+            delete_files(audio_path)
+            delete_files(video_path)
 
-        # download media and store file paths
-        audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
-        video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
+            # return video name
+            return f"{video_name}.mp4"
 
-        # prep ffmpeg merge with video and audio input
-        input_video = ffmpeg.input(video_path)
-        input_audio = ffmpeg.input(audio_path)
-        
-        # merge the files into a single output
-        ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
+        # if there is a video & audio merged stream available
+        elif video.streams.filter(progressive=True):
 
-        # remove unrequired files
-        delete_files(audio_path)
-        delete_files(video_path)
+            # capture file type
+            video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
 
-        # return video name
-        return f"{video_name}.mp4"
+            # download media
+            video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
+
+            # return the file name
+            return f"{video_name}.{video_type}"
+
+    else:
+
+        # if there is a video & audio merged stream available
+        if video.streams.filter(progressive=True):
+
+            # capture file type
+            video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
+
+            # download media
+            video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
+
+            # return the file name
+            return f"{video_name}.{video_type}"
+
+        # if there is only seperate video and audio streams available
+        elif video.streams.filter(adaptive=True):
+
+            # capture file types
+            audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
+            video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
+
+            # download media and store file paths
+            audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
+            video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
+
+            # prep ffmpeg merge with video and audio input
+            input_video = ffmpeg.input(video_path)
+            input_audio = ffmpeg.input(audio_path)
+            
+            # merge the files into a single output
+            ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
+
+            # remove unrequired files
+            delete_files(audio_path)
+            delete_files(video_path)
+
+            # return video name
+            return f"{video_name}.mp4"
 
 # YouTube audio helper
 def audio_processor(video):
@@ -143,7 +184,7 @@ def audio_processor(video):
         return f'{audio_name}.mp3'
 
 # YouTube downloader
-def youtube_download(media_type, number_of_posts_youtube):
+def youtube_download(media_type, number_of_posts_youtube, quality):
 
     # random file name
     output = file_name()
@@ -158,55 +199,111 @@ def youtube_download(media_type, number_of_posts_youtube):
         stream_adaptive = yt.streams.filter(adaptive=True)
         stream_progressive = yt.streams.filter(progressive=True)
 
-        # if it's a progressive stream, for now use this as it's the fastest option
-        if stream_progressive:
+        # HQ
+        if quality:
 
-            # grab the highest quality video 
-            video_stream = stream_progressive[-1]
+            # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
+            if stream_adaptive:
 
-            # capture file type
-            video_type = video_stream.mime_type.partition("/")[2]
+                # grab the highest quality video and audio stream
+                video_stream = stream_adaptive[0]
+                audio_stream = stream_adaptive[-1]
 
-            # create media and store file path
-            video_path = video_stream.download()
+                # capture the file type
+                audio_type = audio_stream.mime_type.partition("/")[2]
+                video_type = video_stream.mime_type.partition("/")[2]
 
-            # create a download button for the user, can output directly with pytube download()
-            with open(video_path, "rb") as file:
-                st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+                # create media and store file path
+                video_path = video_stream.download(filename=f"{file_name()}.{video_type}")
+                audio_path = audio_stream.download(filename=f"{file_name()}.{audio_type}")
 
-            # delete remaining files
-            delete_files(video_path)
+                # prep ffmpeg merge with video and audio input
+                input_video = ffmpeg.input(video_path)
+                input_audio = ffmpeg.input(audio_path)
 
-        # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
-        elif stream_adaptive:
+                # merge the files into a single output
+                ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
 
-            # grab the highest quality video and audio stream
-            video_stream = stream_adaptive[0]
-            audio_stream = stream_adaptive[-1]
+                # create a download button for the user
+                with open(f"{output}.{video_type}", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
 
-            # capture the file type
-            audio_type = audio_stream.mime_type.partition("/")[2]
-            video_type = video_stream.mime_type.partition("/")[2]
+                # delete remaining files
+                delete_files(f"{output}.{video_type}")
+                delete_files(video_path)
+                delete_files(audio_path)
 
-            # create media and store file path
-            video_path = video_stream.download(filename=f"{file_name()}.{video_type}")
-            audio_path = audio_stream.download(filename=f"{file_name()}.{audio_type}")
+            # if it's a progressive stream, for now use this as it's the fastest option
+            elif stream_progressive:
 
-            # prep ffmpeg merge with video and audio input
-            input_video = ffmpeg.input(video_path)
-            input_audio = ffmpeg.input(audio_path)
+                # grab the highest quality video 
+                video_stream = stream_progressive[-1]
 
-            # merge the files into a single output
-            ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
+                # capture file type
+                video_type = video_stream.mime_type.partition("/")[2]
 
-            # create a download button for the user
-            with open(f"{output}.{video_type}", "rb") as file:
-                st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+                # create media and store file path
+                video_path = video_stream.download()
 
-            # delete remaining files
-            delete_files(f"{output}.{video_type}")
-            delete_files(video_path)
-            delete_files(audio_path)
+                # create a download button for the user, can output directly with pytube download()
+                with open(video_path, "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+
+                # delete remaining files
+                delete_files(video_path)
+
+        # fastest
+        else:
+
+            # if it's a progressive stream, for now use this as it's the fastest option
+            if stream_progressive:
+
+                # grab the highest quality video 
+                video_stream = stream_progressive[-1]
+
+                # capture file type
+                video_type = video_stream.mime_type.partition("/")[2]
+
+                # create media and store file path
+                video_path = video_stream.download()
+
+                # create a download button for the user, can output directly with pytube download()
+                with open(video_path, "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+
+                # delete remaining files
+                delete_files(video_path)
+
+            # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
+            elif stream_adaptive:
+
+                # grab the highest quality video and audio stream
+                video_stream = stream_adaptive[0]
+                audio_stream = stream_adaptive[-1]
+
+                # capture the file type
+                audio_type = audio_stream.mime_type.partition("/")[2]
+                video_type = video_stream.mime_type.partition("/")[2]
+
+                # create media and store file path
+                video_path = video_stream.download(filename=f"{file_name()}.{video_type}")
+                audio_path = audio_stream.download(filename=f"{file_name()}.{audio_type}")
+
+                # prep ffmpeg merge with video and audio input
+                input_video = ffmpeg.input(video_path)
+                input_audio = ffmpeg.input(audio_path)
+
+                # merge the files into a single output
+                ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
+
+                # create a download button for the user
+                with open(f"{output}.{video_type}", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+
+                # delete remaining files
+                delete_files(f"{output}.{video_type}")
+                delete_files(video_path)
+                delete_files(audio_path)
     
     # if the user wants audio only
     elif media_type == "Audio":
@@ -276,7 +373,7 @@ def youtube_download(media_type, number_of_posts_youtube):
             for video in islice(p.videos, 0, number_of_posts_youtube):
 
                 # send video object to be processed and downloaded
-                playlist_files.append(video_processor(video))
+                playlist_files.append(video_processor(video, quality))
 
         else:
 
@@ -688,9 +785,11 @@ with st.expander("See info"):
 
         Unfortunately the Insta-grabber only works correctly if you run this app locally.
         
-        You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jwqdk7y7l2yjunmfrge4nhjvnugq/grabby/Grabby.zip).
+        You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jvoinll6rict4t2uamxrcrry4r7a/grabby/Grabby.zip).
         
-        **CAUTION** - Leaving the number input at zero will download the entire playlist/profile.
+        **CAUTION** 
+        - Leaving the number input at zero will download the entire playlist/profile.
+        - HQ will grab the highest available quality, which can take a while.
         """)
 
     st.write("***")
@@ -768,6 +867,8 @@ with tab1:
         with col3:
             confirm_selection_youtube = st.form_submit_button("Submit")
 
+        quality = st.checkbox('HQ')
+
 # Instagram tab
 with tab2:
 
@@ -830,7 +931,7 @@ with tab4:
 
         # create a selection drop down box
         with col1:
-            selection_reddit = st.selectbox('Selection', ('Video', 'Image', 'Audio'), label_visibility="collapsed")
+            selection_reddit = st.selectbox('Selection', ('Video', 'Audio', 'Image'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
@@ -890,7 +991,7 @@ if __name__ == "__main__":
                 with st.spinner(''):
 
                     # grab content and generate download button
-                    youtube_download(selection_youtube, number_of_posts_youtube)
+                    youtube_download(selection_youtube, number_of_posts_youtube, quality)
 
         # if user submits Instagram button
         elif confirm_selection_instagram:
