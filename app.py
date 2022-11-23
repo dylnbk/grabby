@@ -9,21 +9,11 @@ import pyktok as pyk
 import youtube_dl
 from pytube import YouTube
 from pytube import Playlist
+from pytube import Channel
 from RedDownloader import RedDownloader
 from os.path import basename
 from itertools import islice
 from zipfile import ZipFile
-
-# page configurations
-st.set_page_config(
-    page_title="Grab it.",
-    page_icon="▶️",
-    menu_items={
-        'Report a bug': "mailto:dyln.bk@gmail.com",
-        'Get help': None,
-        'About': "Made by dyln.bk"
-    }
-)
 
 # load & inject style sheet
 def local_css(file_name):
@@ -31,14 +21,6 @@ def local_css(file_name):
     # write <style> tags to allow custom css
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-# calculate progress bar
-# def progress_func(stream, chunk, bytes_remaining):
-# 
-#     # send stream size and bytes remaining to calculate the progress
-#     size = stream.filesize
-#     p = int((float(abs(bytes_remaining-size)/size))*float(100))
-#     bar.progress(p)
 
 # generate random file names
 def file_name():
@@ -77,6 +59,88 @@ def delete_files(path):
 
         # remove directory and all its content
         shutil.rmtree(path)
+
+# YouTube video helper
+def video_processor(video):
+
+    # generate a persistent file name
+    video_name = file_name()
+
+    # if there is a video & audio merged stream available
+    if video.streams.filter(progressive=True):
+
+        # capture file type
+        video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
+
+        # download media
+        video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
+
+        # return the file name
+        return f"{video_name}.{video_type}"
+
+    # if there is only seperate video and audio streams available
+    elif video.streams.filter(adaptive=True):
+
+        # capture file types
+        audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
+        video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
+
+        # download media and store file paths
+        audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
+        video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
+
+        # prep ffmpeg merge with video and audio input
+        input_video = ffmpeg.input(video_path)
+        input_audio = ffmpeg.input(audio_path)
+        
+        # merge the files into a single output
+        ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
+
+        # remove unrequired files
+        delete_files(audio_path)
+        delete_files(video_path)
+
+        # return video name
+        return f"{video_name}.mp4"
+
+# YouTube audio helper
+def audio_processor(video):
+
+    # generate a persistent file name
+    audio_name = file_name()
+
+    # if there is an audio stream available
+    if video.streams.filter(only_audio=True):
+        
+        # create media and store file path
+        audio_path = video.streams.filter(only_audio=True)[-1].download(filename=file_name())
+
+        # prep ffmpeg with input
+        input_audio = ffmpeg.input(audio_path)
+
+        # convert to mp3
+        ffmpeg.output(input_audio, f'{audio_name}.mp3').run()
+
+        # delete spare file
+        delete_files(audio_path)
+
+        # return the file name 
+        return f'{audio_name}.mp3'
+
+    else:
+
+        # grab the highest quality stream and store file path
+        video_path = video.streams[-1].download(filename=file_name())
+
+        # prep ffmpeg with video input
+        input_video = ffmpeg.input(video_path)
+
+        # output the audio only
+        ffmpeg.output(input_video, f'{audio_name}.mp3').run()
+
+        delete_files(video_path)
+
+        return f'{audio_name}.mp3'
 
 # YouTube downloader
 def youtube_download(media_type, number_of_posts_youtube):
@@ -157,7 +221,7 @@ def youtube_download(media_type, number_of_posts_youtube):
         if audio_stream:
 
             # create media and store file path
-            audio_path = audio_stream[-1].download(filename=f"{file_name()}")
+            audio_path = audio_stream[-1].download(filename=file_name())
 
             # prep ffmpeg with input
             input_audio = ffmpeg.input(audio_path)
@@ -196,40 +260,95 @@ def youtube_download(media_type, number_of_posts_youtube):
             delete_files(f"{output}.mp3")
             delete_files(video_path)
 
-#    # if the user wants to download a video playlist
-#    elif media_type == "Video Playlist":
-#        
-#        p = Playlist(url_from_user_youtube)
-#
-#        for count, video in enumerate(p.videos):
-#
-#            if count < number_of_posts_youtube:
-#
-#                if video.streams.filter(progressive=True):
-#
-#                    st.write(video.streams.filter(progressive=True)[-1])
-#
-#                elif video.streams.filter(adaptive=True):
-#
-#                    st.write(video.streams.filter(adaptive=True)[0])
-#                    st.write(video.streams.filter(adaptive=True)[-1])
-#
-#    # if the user wants to download an audio only playlist
-#    elif media_type == "Audio Playlist":
-#
-#        p = Playlist(url_from_user_youtube)
-#
-#        for count, video in enumerate(p.videos):
-#
-#            if count < number_of_posts_youtube:
-#
-#                if video.streams.filter(only_audio=True):
-#
-#                    st.write(video.streams.filter(only_audio=True)[-1])
-#
-#                else:
-#
-#                    st.write(video.streams)
+    # if the user wants to download a video playlist
+    elif media_type == "Video - Playlist":
+        
+        # create a playlist object
+        p = Playlist(url_from_user_youtube)
+
+        # create a list for file names
+        playlist_files = []
+
+        # if the user limited their selection
+        if number_of_posts_youtube > 0:
+
+            # iterate through their choice
+            for video in islice(p.videos, 0, number_of_posts_youtube):
+
+                # send video object to be processed and downloaded
+                playlist_files.append(video_processor(video))
+
+        else:
+
+            # iterate through every video
+            for video in p.videos:
+
+                # send video object to be processed and downloaded
+                playlist_files.append(video_processor(video))
+
+        # create a ZipFile object
+        with ZipFile(f"{output}.zip", 'w') as zipObj:
+
+            for file in playlist_files:
+
+                # Add file to zip
+                zipObj.write(file)
+
+        # create a download button for the user
+        with open(f"{output}.zip", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+
+        # removing a files
+        for file in playlist_files:
+
+            delete_files(file)
+
+        delete_files(f"{output}.zip")
+
+    # if the user wants to download an audio only playlist
+    elif media_type == "Audio - Playlist":
+
+        # create a playlist object
+        p = Playlist(url_from_user_youtube)
+
+        # create a list for file names
+        playlist_files = []
+
+        # if the user limited their selection
+        if number_of_posts_youtube > 0:
+
+            # iterate through their choice
+            for video in islice(p.videos, 0, number_of_posts_youtube):
+                
+                # send video object to be processed and downloaded
+                playlist_files.append(audio_processor(video))
+
+        else:
+
+            # iterate through every video
+            for video in p.videos:
+                
+                # send video object to be processed and downloaded
+                playlist_files.append(audio_processor(video))
+
+        # create a ZipFile object
+        with ZipFile(f"{output}.zip", 'w') as zipObj:
+
+            for file in playlist_files:
+
+                # Add file to zip
+                zipObj.write(file)
+
+        # create a download button for the user
+        with open(f"{output}.zip", "rb") as file:
+            st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
+
+        # removing files
+        for file in playlist_files:
+
+            delete_files(file)
+
+        delete_files(f"{output}.zip")
 
 # Instagram downloader
 def instagram_download(media_type, number_of_posts_insta):
@@ -325,7 +444,7 @@ def tiktok_download(media_type, number_of_posts_tiktok):
         # delete remaining files
         delete_files(video_fn)
 
-    # if the user wants to download the last 10 videos
+    # if the user wants to download up to last 30 videos
     elif media_type == "Profile":
 
         # array for file names
@@ -463,10 +582,13 @@ def reddit_download(media_type):
 # Twitter downloader
 def twitter_downloader():
     
+    # generate a persistent file name
     output = file_name()
 
+    # grab .mp4
     ydl_opts = {'outtmpl': f'{output}.mp4'}
 
+    # download if available
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url_from_user_twitter])
 
@@ -480,12 +602,16 @@ def twitter_downloader():
 # Surprise downloader - all yt-dlp supported sites
 def surprise_downloader(media_type):
 
+    # generate a persistent file name
     output = file_name()
 
+    # if user wants a video
     if media_type == "Video":
 
+        # grab .mp4
         ydl_opts = {'outtmpl': f'{output}.mp4'}
 
+        # download the file if available
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
@@ -496,10 +622,13 @@ def surprise_downloader(media_type):
         # removing a files
         delete_files(f"{output}.mp4")
 
+    # if the user wants audio
     elif media_type == "Audio":
 
+        # grab .mp3
         ydl_opts = {'outtmpl': f'{output}.mp3'}
 
+        # download the file if available
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
@@ -510,10 +639,13 @@ def surprise_downloader(media_type):
         # removing a files
         delete_files(f"{output}.mp3")
 
+    # if the user wants image
     elif media_type == "Image":
 
+        # grab .jpeg
         ydl_opts = {'outtmpl': f'{output}.jpeg'}
 
+        # download the file if available
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
@@ -524,12 +656,27 @@ def surprise_downloader(media_type):
         # removing a files
         delete_files(f"{output}.jpeg")
 
-# main
+# main VISUAL ELEMENTS BEGIN HERE <<----------------------------------------------------------------------------||
+
+# burger menu config
+st.set_page_config(
+    page_title="Grab it.",
+    page_icon="▶️",
+    menu_items={
+        'Report a bug': "mailto:dyln.bk@gmail.com",
+        'Get help': None,
+        'About': "Made by dyln.bk"
+    }
+)
+
+# inject css
 local_css("style.css")
+
+# page title
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Lucky 🤞"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Lucky 🤞 "])
 
 # create an info box
 with st.expander("See info"):
@@ -542,6 +689,8 @@ with st.expander("See info"):
         Unfortunately the Insta-grabber only works correctly if you run this app locally.
         
         You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jwqdk7y7l2yjunmfrge4nhjvnugq/grabby/Grabby.zip).
+        
+        **CAUTION** - Leaving the number input at zero will download the entire playlist / profile.
         """)
 
     st.write("***")
@@ -609,7 +758,7 @@ with tab1:
 
         # create a selection drop down box
         with col1:
-            selection_youtube = st.selectbox('Selection', ('Video', 'Audio', 'Channel', 'Video Playlist', 'Audio Playlist'), label_visibility="collapsed")
+            selection_youtube = st.selectbox('Selection', ('Video', 'Audio', 'Video - Playlist', 'Audio - Playlist'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
@@ -794,5 +943,6 @@ if __name__ == "__main__":
                     # call downloader
                     surprise_downloader(selection_surprise)
 
+    # pain
     except Exception as e:
                 st.error(f"This link is currently unavailable to download...", icon="💔")
