@@ -690,15 +690,15 @@ with st.expander("See info"):
         
         You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jwqdk7y7l2yjunmfrge4nhjvnugq/grabby/Grabby.zip).
         
-        **CAUTION** - Leaving the number input at zero will download the entire playlist / profile.
+        **CAUTION** - Leaving the number input at zero will download the entire playlist/profile.
         """)
 
     st.write("***")
 
     st.write("""
         ##### YouTube
-        - Video (MP4) / Audio (MP3) download.
-        - Video (MP4) / Audio (MP3) playlist download.
+        - Video (MP4) & Audio (MP3) download.
+        - Video (MP4) & Audio (MP3) playlist download.
         - Shorts (MP4) download.
          """)
     
@@ -706,7 +706,7 @@ with st.expander("See info"):
 
     st.write("""
         ##### Instagram
-        - Single post / Profile download.
+        - Single post & Profile download.
         - Web version doesn't always work.
          """)
 
@@ -722,8 +722,8 @@ with st.expander("See info"):
 
     st.write("""
         ##### Reddit
-        - Video (MP4) / Audio (MP3) download - will convert videos to audio.
-        - Image (JPG) / Gallery download - will grab all images in a post.
+        - Video (MP4) & Audio (MP3) download - will convert videos to audio.
+        - Image (JPG) & Gallery download - will grab all images in a post.
          """)
 
     st.write("***")
@@ -754,18 +754,19 @@ with tab1:
         url_from_user_youtube = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
         # create a column layout
-        col1, col2 = st.columns([6.5, 1])
+        col1, col2, col3 = st.columns([2, 1, 1])
 
         # create a selection drop down box
         with col1:
             selection_youtube = st.selectbox('Selection', ('Video', 'Audio', 'Video - Playlist', 'Audio - Playlist'), label_visibility="collapsed")
 
-        # create a sumbit button
-        with col2:
-            confirm_selection_youtube = st.form_submit_button("Submit")
-
         # how many posts to download from profile
-        number_of_posts_youtube = st.number_input('Leave at zero to grab entire playlist:', min_value=0, label_visibility="collapsed")
+        with col2:
+            number_of_posts_youtube = st.number_input('Leave at zero to grab entire playlist:', min_value=0, label_visibility="collapsed")
+
+        # create a sumbit button
+        with col3:
+            confirm_selection_youtube = st.form_submit_button("Submit")
 
 # Instagram tab
 with tab2:
@@ -777,18 +778,19 @@ with tab2:
         url_from_user_instagram = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
         # create a column layout
-        col1, col2 = st.columns([6.5, 1])
+        col1, col2, col3 = st.columns([2, 1, 1])
 
         # create a selection drop down box
         with col1:
             selection_instagram = st.selectbox('Selection', ('Video', 'Image', 'Profile'), label_visibility="collapsed")
 
-        # create a sumbit button
-        with col2:
-            confirm_selection_instagram = st.form_submit_button("Submit")
-
         # how many posts to download from profile
-        number_of_posts_insta = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
+        with col2:
+            number_of_posts_insta = st.number_input('Leave at zero to grab all posts:', min_value=0, label_visibility="collapsed")
+
+        # create a sumbit button
+        with col3:
+            confirm_selection_instagram = st.form_submit_button("Submit")
 
 # TikTok tab
 with tab3:
@@ -800,18 +802,19 @@ with tab3:
         url_from_user_tiktok = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
         # create a column layout
-        col1, col2 = st.columns([6.5, 1])
+        col1, col2, col3 = st.columns([2, 1, 1])
 
         # create a selection drop down box
         with col1:
             selection_tiktok = st.selectbox('Selection', ('Video', 'Profile'), label_visibility="collapsed")
 
-        # create a sumbit button
-        with col2:
-            confirm_selection_tiktok = st.form_submit_button("Submit")
-
         # how many posts to download from profile
-        number_of_posts_tiktok = st.number_input('Leave at zero to grab all posts:', min_value=0, max_value=30, label_visibility="collapsed")
+        with col2:
+            number_of_posts_tiktok = st.number_input('Leave at zero to grab all posts:', min_value=0, max_value=30, label_visibility="collapsed")
+
+        # create a sumbit button
+        with col3:
+            confirm_selection_tiktok = st.form_submit_button("Submit")
 
 # Reddit tab
 with tab4:
@@ -823,7 +826,7 @@ with tab4:
         url_from_user_reddit = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
         # create a column layout
-        col1, col2 = st.columns([6.5, 1])
+        col1, col2 = st.columns([3, 1])
 
         # create a selection drop down box
         with col1:
@@ -843,7 +846,7 @@ with tab5:
         url_from_user_twitter = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
         # create a column layout
-        col1, col2 = st.columns([6.5, 1])
+        col1, col2 = st.columns([3, 1])
 
         # create a selection drop down box
         with col1:
@@ -863,7 +866,7 @@ with tab6:
         url_from_user_surprise = st.text_input('Enter the link:', placeholder='https://www.your-link-here.com/...')
 
         # create a column layout
-        col1, col2 = st.columns([6.5, 1])
+        col1, col2 = st.columns([3, 1])
 
         # create a selection drop down box
         with col1:
