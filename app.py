@@ -762,7 +762,7 @@ st.set_page_config(
     menu_items={
         'Report a bug': "mailto:dyln.bk@gmail.com",
         'Get help': None,
-        'About': "Made by dyln.bk"
+        'About': None
     }
 )
 
@@ -787,6 +787,8 @@ with st.expander("See info"):
         
         You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jvoinll6rict4t2uamxrcrry4r7a/grabby/Grabby.zip).
         
+        To show support, you can ☕ [buy me a coffee](https://www.buymeacoffee.com/dylnbk).
+
         **CAUTION** 
         - Leaving the number input at zero will download the entire playlist/profile.
         - HQ will grab the highest available quality, which can take a while.
@@ -931,7 +933,7 @@ with tab4:
 
         # create a selection drop down box
         with col1:
-            selection_reddit = st.selectbox('Selection', ('Video', 'Audio', 'Image'), label_visibility="collapsed")
+            selection_reddit = st.selectbox('Selection', ('Video', 'Image', 'Audio'), label_visibility="collapsed")
 
         # create a sumbit button
         with col2:
