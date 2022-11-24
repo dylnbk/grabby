@@ -222,14 +222,14 @@ def youtube_download(media_type, number_of_posts_youtube, quality):
                 input_audio = ffmpeg.input(audio_path)
 
                 # merge the files into a single output
-                ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
+                ffmpeg.output(input_audio, input_video, f'{output}.mp4').run()
 
                 # create a download button for the user
-                with open(f"{output}.{video_type}", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+                with open(f"{output}.mp4", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime="video")
 
                 # delete remaining files
-                delete_files(f"{output}.{video_type}")
+                delete_files(f"{output}.mp4")
                 delete_files(video_path)
                 delete_files(audio_path)
 
@@ -294,14 +294,14 @@ def youtube_download(media_type, number_of_posts_youtube, quality):
                 input_audio = ffmpeg.input(audio_path)
 
                 # merge the files into a single output
-                ffmpeg.output(input_audio, input_video, f'{output}.{video_type}').run()
+                ffmpeg.output(input_audio, input_video, f'{output}.mp4').run()
 
                 # create a download button for the user
-                with open(f"{output}.{video_type}", "rb") as file:
-                    st.download_button("Download", data=file, file_name=f"{file_name()}.{video_type}", mime="video")
+                with open(f"{output}.mp4", "rb") as file:
+                    st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime="video")
 
                 # delete remaining files
-                delete_files(f"{output}.{video_type}")
+                delete_files(f"{output}.mp4")
                 delete_files(video_path)
                 delete_files(audio_path)
     
