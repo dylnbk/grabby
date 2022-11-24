@@ -762,7 +762,7 @@ st.set_page_config(
     menu_items={
         'Report a bug': "mailto:dyln.bk@gmail.com",
         'Get help': None,
-        'About': None
+        'About': "Made by dyln.bk"
     }
 )
 
