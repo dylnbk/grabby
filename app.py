@@ -808,7 +808,7 @@ with st.expander("See info"):
 
         **CAUTION** 
         - Leaving the number input at zero will download the entire playlist/profile.
-        - HQ will grab the highest available quality, which can take a while.
+        - HQ will grab the highest available quality, which can take quite a while.
         """)
 
     st.write("***")
@@ -854,9 +854,9 @@ with st.expander("See info"):
     st.write("***")
 
     st.write("""
-        ##### Lucky
+        ##### Lucky 🤞
         - You can grab from many different places.
-        - For a full list of supported websites visit [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
+        - Powered by yt dlp - for a full list of supported websites visit [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
          """)
 
     st.write("")
