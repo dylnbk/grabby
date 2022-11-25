@@ -9,7 +9,6 @@ import pyktok as pyk
 import youtube_dl
 from pytube import YouTube
 from pytube import Playlist
-from pytube import Channel
 from RedDownloader import RedDownloader
 from os.path import basename
 from itertools import islice
@@ -61,146 +60,60 @@ def delete_files(path):
         shutil.rmtree(path)
 
 # YouTube video helper
-def video_processor(video, quality):
+def video_processor(video, quality, playlist):
 
     # generate a persistent file name
     video_name = file_name()
 
+    # if user wants full HQ, we will try to get the adaptive stream first
     if quality:
 
-        # if there is only seperate video and audio streams available
-        if video.streams.filter(adaptive=True):
+        # if the user is downloading a playlist
+        if playlist:
 
-            # capture file types
-            audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
-            video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
+            # try adaptive first as it contains highest quality video
+            if video.streams.filter(adaptive=True):
 
-            # download media and store file paths
-            audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
-            video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
+                # capture file types
+                audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
+                video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
 
-            # prep ffmpeg merge with video and audio input
-            input_video = ffmpeg.input(video_path)
-            input_audio = ffmpeg.input(audio_path)
-            
-            # merge the files into a single output
-            ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
+                # download media and store file paths
+                audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
+                video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
 
-            # remove unrequired files
-            delete_files(audio_path)
-            delete_files(video_path)
-
-            # return video name
-            return f"{video_name}.mp4"
-
-        # if there is a video & audio merged stream available
-        elif video.streams.filter(progressive=True):
-
-            # capture file type
-            video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
-
-            # download media
-            video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
-
-            # return the file name
-            return f"{video_name}.{video_type}"
-
-    else:
-
-        # if there is a video & audio merged stream available
-        if video.streams.filter(progressive=True):
-
-            # capture file type
-            video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
-
-            # download media
-            video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
-
-            # return the file name
-            return f"{video_name}.{video_type}"
-
-        # if there is only seperate video and audio streams available
-        elif video.streams.filter(adaptive=True):
-
-            # capture file types
-            audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
-            video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
-
-            # download media and store file paths
-            audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
-            video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
-
-            # prep ffmpeg merge with video and audio input
-            input_video = ffmpeg.input(video_path)
-            input_audio = ffmpeg.input(audio_path)
-            
-            # merge the files into a single output
-            ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
-
-            # remove unrequired files
-            delete_files(audio_path)
-            delete_files(video_path)
-
-            # return video name
-            return f"{video_name}.mp4"
-
-# YouTube audio helper
-def audio_processor(video):
-
-    # generate a persistent file name
-    audio_name = file_name()
-
-    # if there is an audio stream available
-    if video.streams.filter(only_audio=True):
-        
-        # create media and store file path
-        audio_path = video.streams.filter(only_audio=True)[-1].download(filename=file_name())
-
-        # prep ffmpeg with input
-        input_audio = ffmpeg.input(audio_path)
-
-        # convert to mp3
-        ffmpeg.output(input_audio, f'{audio_name}.mp3').run()
-
-        # delete spare file
-        delete_files(audio_path)
-
-        # return the file name 
-        return f'{audio_name}.mp3'
-
-    else:
-
-        # grab the highest quality stream and store file path
-        video_path = video.streams[-1].download(filename=file_name())
-
-        # prep ffmpeg with video input
-        input_video = ffmpeg.input(video_path)
-
-        # output the audio only
-        ffmpeg.output(input_video, f'{audio_name}.mp3').run()
-
-        delete_files(video_path)
-
-        return f'{audio_name}.mp3'
-
-# YouTube downloader
-def youtube_download(media_type, number_of_posts_youtube, quality):
-
-    # random file name
-    output = file_name()
-
-    # if the user wants full video
-    if media_type == "Video":
-
-        # grab YouTube datastream, on_progress_callback generates progress bar data
-        yt = YouTube(url_from_user_youtube)
+                # prep ffmpeg merge with video and audio input
+                input_video = ffmpeg.input(video_path)
+                input_audio = ffmpeg.input(audio_path)
                 
-        # filter adpative / progressive streams, adaptive = audio & video are seperated 
-        stream_adaptive = yt.streams.filter(adaptive=True)
-        stream_progressive = yt.streams.filter(progressive=True)
+                # merge the files into a single output
+                ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
 
-        # HQ
-        if quality:
+                # remove unrequired files
+                delete_files(audio_path)
+                delete_files(video_path)
+
+                # return video name
+                return f"{video_name}.mp4"
+
+            # if there is a video & audio merged stream available
+            elif video.streams.filter(progressive=True):
+
+                # capture file type
+                video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
+
+                # download media
+                video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
+
+                # return the file name
+                return f"{video_name}.{video_type}"
+        
+        # not a playlist, so only single videos
+        else:
+
+            # filter adpative / progressive streams, adaptive = audio & video are seperated 
+            stream_adaptive = video.streams.filter(adaptive=True)
+            stream_progressive = video.streams.filter(progressive=True)
 
             # else if it's an adaptive stream only, grab audio + video and merge them with ffmpeg
             if stream_adaptive:
@@ -222,18 +135,18 @@ def youtube_download(media_type, number_of_posts_youtube, quality):
                 input_audio = ffmpeg.input(audio_path)
 
                 # merge the files into a single output
-                ffmpeg.output(input_audio, input_video, f'{output}.mp4').run()
+                ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
 
                 # create a download button for the user
-                with open(f"{output}.mp4", "rb") as file:
+                with open(f"{video_name}.mp4", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime="video")
 
                 # delete remaining files
-                delete_files(f"{output}.mp4")
+                delete_files(f"{video_name}.mp4")
                 delete_files(video_path)
                 delete_files(audio_path)
 
-            # if it's a progressive stream, for now use this as it's the fastest option
+            # if it's only a progressive stream
             elif stream_progressive:
 
                 # grab the highest quality video 
@@ -252,10 +165,57 @@ def youtube_download(media_type, number_of_posts_youtube, quality):
                 # delete remaining files
                 delete_files(video_path)
 
-        # fastest
+    # user did not check the HQ box, so we can get the progressive stream as it's the fastest
+    else:
+
+        # if user wants a playlist
+        if playlist:
+
+            # if there is a video & audio merged stream available
+            if video.streams.filter(progressive=True):
+
+                # capture file type
+                video_type = video.streams.filter(progressive=True)[-1].mime_type.partition("/")[2]
+
+                # download media
+                video.streams.filter(progressive=True)[-1].download(filename=f"{video_name}.{video_type}")
+
+                # return the file name
+                return f"{video_name}.{video_type}"
+
+            # if there is only seperate video and audio streams available
+            elif video.streams.filter(adaptive=True):
+
+                # capture file types
+                audio_type = video.streams.filter(adaptive=True)[0].mime_type.partition("/")[2]
+                video_type = video.streams.filter(adaptive=True)[-1].mime_type.partition("/")[2]
+
+                # download media and store file paths
+                audio_path = video.streams.filter(adaptive=True)[-1].download(filename=f"{file_name()}.{audio_type}")
+                video_path = video.streams.filter(adaptive=True)[0].download(filename=f"{file_name()}.{video_type}")
+
+                # prep ffmpeg merge with video and audio input
+                input_video = ffmpeg.input(video_path)
+                input_audio = ffmpeg.input(audio_path)
+                
+                # merge the files into a single output
+                ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
+
+                # remove unrequired files
+                delete_files(audio_path)
+                delete_files(video_path)
+
+                # return video name
+                return f"{video_name}.mp4"
+        
+        # user wants a single video 
         else:
 
-            # if it's a progressive stream, for now use this as it's the fastest option
+            # filter adpative / progressive streams, adaptive = audio & video are seperated 
+            stream_adaptive = video.streams.filter(adaptive=True)
+            stream_progressive = video.streams.filter(progressive=True)
+
+            # if it's a progressive stream, use this as it's the faster option
             if stream_progressive:
 
                 # grab the highest quality video 
@@ -294,21 +254,77 @@ def youtube_download(media_type, number_of_posts_youtube, quality):
                 input_audio = ffmpeg.input(audio_path)
 
                 # merge the files into a single output
-                ffmpeg.output(input_audio, input_video, f'{output}.mp4').run()
+                ffmpeg.output(input_audio, input_video, f'{video_name}.mp4').run()
 
                 # create a download button for the user
-                with open(f"{output}.mp4", "rb") as file:
+                with open(f"{video_name}.mp4", "rb") as file:
                     st.download_button("Download", data=file, file_name=f"{file_name()}.mp4", mime="video")
 
                 # delete remaining files
-                delete_files(f"{output}.mp4")
+                delete_files(f"{video_name}.mp4")
                 delete_files(video_path)
                 delete_files(audio_path)
+
+# YouTube audio helper
+def audio_processor(video):
+
+    # generate a persistent file name
+    audio_name = file_name()
+
+    # if there is an audio stream available
+    if video.streams.filter(only_audio=True):
+        
+        # create media and store file path
+        audio_path = video.streams.filter(only_audio=True)[-1].download(filename=file_name())
+
+        # prep ffmpeg with input
+        input_audio = ffmpeg.input(audio_path)
+
+        # convert to mp3
+        ffmpeg.output(input_audio, f'{audio_name}.mp3').run()
+
+        # delete spare file
+        delete_files(audio_path)
+
+        # return the file name 
+        return f'{audio_name}.mp3'
+
+    else:
+
+        # grab the highest quality stream and store file path
+        video_path = video.streams[-1].download(filename=file_name())
+
+        # prep ffmpeg with video input
+        input_video = ffmpeg.input(video_path)
+
+        # output the audio only
+        ffmpeg.output(input_video, f'{audio_name}.mp3').run()
+
+        # delete spare file
+        delete_files(video_path)
+
+        # return the file name 
+        return f'{audio_name}.mp3'
+
+# YouTube downloader
+def youtube_download(media_type, number_of_posts_youtube, quality):
+
+    # random file name
+    output = file_name()
+
+    # if the user wants full video
+    if media_type == "Video":
+
+        # grab YouTube datastream
+        video = YouTube(url_from_user_youtube)
+        
+        # send stream to be processed and downloaded
+        video_processor(video, quality, False)
     
     # if the user wants audio only
     elif media_type == "Audio":
 
-        # grab YouTube datastream, on_progress_callback generates progress bar data
+        # grab YouTube datastream
         yt = YouTube(url_from_user_youtube)
 
         # check for audio only streams
@@ -373,7 +389,7 @@ def youtube_download(media_type, number_of_posts_youtube, quality):
             for video in islice(p.videos, 0, number_of_posts_youtube):
 
                 # send video object to be processed and downloaded
-                playlist_files.append(video_processor(video, quality))
+                playlist_files.append(video_processor(video, quality, True))
 
         else:
 
@@ -381,7 +397,7 @@ def youtube_download(media_type, number_of_posts_youtube, quality):
             for video in p.videos:
 
                 # send video object to be processed and downloaded
-                playlist_files.append(video_processor(video))
+                playlist_files.append(video_processor(video, quality, True))
 
         # create a ZipFile object
         with ZipFile(f"{output}.zip", 'w') as zipObj:
@@ -456,6 +472,7 @@ def instagram_download(media_type, number_of_posts_insta):
     # Get instance
     L = instaloader.Instaloader(save_metadata=False)
 
+    # if the user wants a video or image post
     if media_type == "Video" or media_type == "Image":
 
         # basic URL formatting
@@ -479,7 +496,7 @@ def instagram_download(media_type, number_of_posts_insta):
         delete_files(f"{output}.zip")
         delete_files(output)
         
-
+    # if the user wants a full profile
     elif media_type == "Profile":
 
         # basic URL formatting
@@ -519,7 +536,7 @@ def instagram_download(media_type, number_of_posts_insta):
 # TikTok downloader
 def tiktok_download(media_type, number_of_posts_tiktok):
 
-    # create a random file name
+    # create a persistent file name
     output = file_name()
 
     # if the user chooses a single video
@@ -869,6 +886,7 @@ with tab1:
         with col3:
             confirm_selection_youtube = st.form_submit_button("Submit")
 
+        # check box if True will try to download highest available stream
         quality = st.checkbox('HQ')
 
 # Instagram tab

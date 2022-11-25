@@ -8,4 +8,3 @@ instaloader==4.9.5
 pyktok==0.0.9
 browser-cookie3==0.16.2
 beautifulsoup4==4.11.1
-ffmpeg
