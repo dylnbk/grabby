@@ -869,7 +869,7 @@ with tab1:
     with st.form("input_youtube", clear_on_submit=True):
 
         # get user URL with a text input box
-        url_from_user_youtube = st.text_input('Enter a link:', placeholder='https://www.youtube.com/...')
+        url_from_user_youtube = st.text_input('Enter a link:', placeholder='https://www.youtube.com...')
 
         # create a column layout
         col1, col2, col3 = st.columns([2, 1, 1])
@@ -896,7 +896,7 @@ with tab2:
     with st.form("input_instagram", clear_on_submit=True):
 
         # get user URL with a text input box
-        url_from_user_instagram = st.text_input('Enter a link:', placeholder='https://www.instagram.com/...')
+        url_from_user_instagram = st.text_input('Enter a link:', placeholder='https://www.instagram.com...')
 
         # create a column layout
         col1, col2, col3 = st.columns([2, 1, 1])
@@ -920,7 +920,7 @@ with tab3:
     with st.form("input_tiktok", clear_on_submit=True):
 
         # get user URL with a text input box
-        url_from_user_tiktok = st.text_input('Enter a link:', placeholder='https://www.tiktok.com/...')
+        url_from_user_tiktok = st.text_input('Enter a link:', placeholder='https://www.tiktok.com...')
 
         # create a column layout
         col1, col2, col3 = st.columns([2, 1, 1])
@@ -944,7 +944,7 @@ with tab4:
     with st.form("input_reddit", clear_on_submit=True):
 
         # get user URL with a text input box
-        url_from_user_reddit = st.text_input('Enter a link:', placeholder='https://www.reddit.com/...')
+        url_from_user_reddit = st.text_input('Enter a link:', placeholder='https://www.reddit.com...')
 
         # create a column layout
         col1, col2 = st.columns([3, 1])
@@ -964,7 +964,7 @@ with tab5:
     with st.form("input_twitter", clear_on_submit=True):
 
         # get user URL with a text input box
-        url_from_user_twitter = st.text_input('Enter a link:', placeholder='https://twitter.com/...')
+        url_from_user_twitter = st.text_input('Enter a link:', placeholder='https://www.twitter.com...')
 
         # create a column layout
         col1, col2 = st.columns([3, 1])
@@ -984,7 +984,7 @@ with tab6:
     with st.form("input_surprise", clear_on_submit=True):
 
         # get user URL with a text input box
-        url_from_user_surprise = st.text_input('Enter a link:', placeholder='https://www.tryanywebsite.com/...')
+        url_from_user_surprise = st.text_input('Enter a link:', placeholder='https://www.areyoulucky.com...')
 
         # create a column layout
         col1, col2 = st.columns([3, 1])
