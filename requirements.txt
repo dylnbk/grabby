@@ -1,5 +1,5 @@
 pytube==12.1.0
-youtube_dl==2021.12.17
+yt-dlp==2022.11.11
 streamlit==1.14.0
 ffmpeg-python==0.2.0
 imageio-ffmpeg==0.4.7

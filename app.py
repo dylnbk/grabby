@@ -6,7 +6,7 @@ import shutil
 import ffmpeg
 import instaloader
 import pyktok as pyk
-import youtube_dl
+import yt_dlp
 from pytube import YouTube
 from pytube import Playlist
 from RedDownloader import RedDownloader
@@ -703,7 +703,7 @@ def twitter_downloader():
     ydl_opts = {'outtmpl': f'{output}.mp4'}
 
     # download if available
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url_from_user_twitter])
 
     # create a download button for the user
@@ -726,7 +726,7 @@ def surprise_downloader(media_type):
         ydl_opts = {'outtmpl': f'{output}.mp4'}
 
         # download the file if available
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
         # create a download button for the user
@@ -743,7 +743,7 @@ def surprise_downloader(media_type):
         ydl_opts = {'outtmpl': f'{output}.mp3'}
 
         # download the file if available
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
         # create a download button for the user
@@ -760,7 +760,7 @@ def surprise_downloader(media_type):
         ydl_opts = {'outtmpl': f'{output}.jpeg'}
 
         # download the file if available
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url_from_user_surprise])
 
         # create a download button for the user
