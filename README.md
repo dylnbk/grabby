@@ -25,4 +25,4 @@ Web version can be used @ [grabby.page](https://grabby.page/) and [grabby.stream
 - [reddownloader](https://github.com/JackhammerYT/RedDownloader)
 
 #### Twitter / Lucky:
-- [youtube_dl](https://github.com/ytdl-org/youtube-dl)
+- [yt_dlp](https://github.com/yt-dlp/yt-dlp)
