@@ -723,7 +723,7 @@ def surprise_downloader(media_type):
     if media_type == "Video":
 
         # grab .mp4
-        ydl_opts = {'outtmpl': f'{output}.mp4'}
+        ydl_opts = {'outtmpl': f'{output}.mp4', 'format': 'mp4'}
 
         # download the file if available
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -1069,4 +1069,4 @@ if __name__ == "__main__":
 
     # pain
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...", icon="💔")
+                st.error(f"This link is currently unavailable to download...\n\n{e}", icon="💔")
