@@ -802,7 +802,7 @@ with st.expander("See info"):
 
         Unfortunately the Insta-grabber only works correctly if you run this app locally.
         
-        You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jvoinll6rict4t2uamxrcrry4r7a/grabby/Grabby.zip).
+        You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jxgizi2qhjoqteuofxywilmnth4a/grabby/Grabby.zip).
         
         To show support, you can ☕ [buy me a coffee](https://www.buymeacoffee.com/dylnbk).
 
@@ -1031,6 +1031,7 @@ if __name__ == "__main__":
             if url_from_user_tiktok:
 
                 with st.spinner(''):
+
                     # grab content and generate download button
                     tiktok_download(selection_tiktok, number_of_posts_tiktok)
         
@@ -1069,4 +1070,4 @@ if __name__ == "__main__":
 
     # pain
     except Exception as e:
-                st.error(f"This link is currently unavailable to download...\n\n{e}", icon="💔")
+                st.error(f"This link is currently unavailable to download...", icon="💔")
