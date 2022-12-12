@@ -804,6 +804,8 @@ with st.expander("See info"):
         
         You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jxgizi2qhjoqteuofxywilmnth4a/grabby/Grabby.zip).
         
+        Web versions can be used @ [grabby.page](https://grabby.page/) and [grabby.streamlit.app](https://grabby.streamlit.app/).
+
         To show support, you can ☕ [buy me a coffee](https://www.buymeacoffee.com/dylnbk).
 
         **CAUTION** 
