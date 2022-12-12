@@ -799,8 +799,6 @@ with st.expander("See info"):
 
     st.write("""
         This website was made using Python, you can view the source [here](https://github.com/dylnbk/grabby).
-
-        Unfortunately the Insta-grabber only works correctly if you run this app locally.
         
         You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jxgizi2qhjoqteuofxywilmnth4a/grabby/Grabby.zip).
         
