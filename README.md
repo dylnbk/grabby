@@ -4,7 +4,7 @@ A Streamlit powered front-end that uses a collection of packages to grab content
 
 You can download a version that has been bundled into an .exe [here](https://link.storjshare.io/s/jxgizi2qhjoqteuofxywilmnth4a/grabby/Grabby.zip).
 
-Web version can be used @ [grabby.page](https://grabby.page/) and [grabby.streamlit.app](https://grabby.streamlit.app/).
+Web version can be used @ [grabby.streamlit.app](https://grabby.streamlit.app/).
 
 ### The packages doing all the hard work...
 
