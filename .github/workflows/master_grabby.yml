@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'grabby'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8C7CE30C771A4D71909028FA397C4C87 }}
+          # publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8C7CE30C771A4D71909028FA397C4C87 }}
