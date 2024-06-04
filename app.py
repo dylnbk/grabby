@@ -802,7 +802,7 @@ with st.expander("See info"):
              
         Check out my personal website [dylnbk.page](https://dylnbk.page).
         
-        You can run this app locally by downloading and opening the Grabby.exe found [here](https://link.storjshare.io/s/jxgizi2qhjoqteuofxywilmnth4a/grabby/Grabby.zip).
+        You can run this app locally by downloading and opening the Grabby.exe found [here](https://drive.google.com/file/d/1wpsyToNvN1-ouWkjOJ3J2fXI4GDANhT0/view?usp=sharing).
 
         To show support, you can ☕ [buy me a coffee](https://www.buymeacoffee.com/dylnbk).
 
