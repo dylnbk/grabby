@@ -2,7 +2,7 @@
 
 A Streamlit powered front-end that uses a collection of packages to grab content from YouTube, Instagram, TikTok, Reddit, Twitter & more.
 
-You can download a version that has been bundled into an .exe [here](https://link.storjshare.io/s/jxgizi2qhjoqteuofxywilmnth4a/grabby/Grabby.zip).
+You can download a version that has been bundled into an .exe [here](https://drive.google.com/file/d/1wpsyToNvN1-ouWkjOJ3J2fXI4GDANhT0/view?usp=sharing).
 
 Web version can be used @ [grabby.streamlit.app](https://grabby.streamlit.app/).
 

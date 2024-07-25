@@ -801,6 +801,11 @@ with st.expander("See info"):
         This website was made using Python, you can view the source [here](https://github.com/dylnbk/grabby).
              
         Check out my personal website [dylnbk.page](https://dylnbk.page).
+<<<<<<< HEAD:main.py
+=======
+        
+        You can run this app locally by downloading and opening the Grabby.exe found [here](https://drive.google.com/file/d/1wpsyToNvN1-ouWkjOJ3J2fXI4GDANhT0/view?usp=sharing).
+>>>>>>> 86dc29a0d37fc2e753266b8bb41c155935afa400:app.py
 
         To show support, you can ☕ [buy me a coffee](https://www.buymeacoffee.com/dylnbk).
 
