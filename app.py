@@ -5,7 +5,7 @@ import re
 import shutil
 import ffmpeg
 import instaloader
-import pyktok as pyk
+# import pyktok as pyk
 import yt_dlp
 from pytube import YouTube
 from pytube import Playlist
@@ -533,78 +533,6 @@ def instagram_download(media_type, number_of_posts_insta):
         delete_files(f"{output}.zip")
         delete_files(output)
 
-# TikTok downloader
-def tiktok_download(media_type, number_of_posts_tiktok):
-
-    # create a persistent file name
-    output = file_name()
-
-    # if the user chooses a single video
-    if media_type == "Video":
-
-        # this section is copied from pytok to get the same file name convention
-        regex_url = re.findall(r'(?<=@)(.+?)(?=\?|$)', url_from_user_tiktok)[0]
-
-        # store the name of the video
-        video_fn = regex_url.replace('/','_') + '.mp4'
-
-        # download the video
-        pyk.save_tiktok(url_from_user_tiktok, True)
-        
-        # create a download button for the user
-        with open(f"{video_fn}", "rb") as file:
-            st.download_button("Download", data=file, file_name=f"{output}.mp4", mime="Video")
-
-        # delete remaining files
-        delete_files(video_fn)
-
-    # if the user wants to download up to last 30 videos
-    elif media_type == "Profile":
-
-        # array for file names
-        file_names = []
-
-        # get up to 30 latest videos
-        tiktok_videos = pyk.get_account_video_urls(url_from_user_tiktok)
-
-        # if the user provided a selection
-        if number_of_posts_tiktok > 0:
-
-            # while the amount of URLs are more than the users selection
-            while len(tiktok_videos) > number_of_posts_tiktok:
-
-                # remove excess URLs
-                tiktok_videos.pop()
-
-        # save the selected videos
-        pyk.save_tiktok_multi(tiktok_videos)
-
-        # get a list of file names
-        for video_url in tiktok_videos:
-
-            regex_url = re.findall(r'(?<=@)(.+?)(?=\?|$)', video_url)[0]
-
-            file_names.append(regex_url.replace('/','_') + '.mp4')
-
-        # create a ZipFile object
-        with ZipFile(f"{output}.zip", 'w') as zipObj:
-
-            for file in file_names:
-
-                # Add file to zip
-                zipObj.write(file)
-
-        # create a download button for the user
-        with open(f"{output}.zip", "rb") as file:
-            st.download_button("Download", data=file, file_name=f"{file_name()}.zip", mime="zip")
-
-        # removing a files
-        for file in file_names:
-
-            delete_files(file)
-
-        delete_files(f"{output}.zip")
-
 # Reddit downloader
 def reddit_download(media_type):
     
@@ -790,7 +718,7 @@ local_css("style.css")
 st.title('Grab it.')
 
 # define tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["YouTube", "Instagram", "TikTok", "Reddit", "Twitter", "Lucky 🤞 "])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["YouTube", "Instagram", "Reddit", "Twitter", "Lucky 🤞 "])
 
 # create an info box
 with st.expander("See info"):
@@ -829,14 +757,6 @@ with st.expander("See info"):
         ##### Instagram
         - Single post & Profile download.
         - Web version doesn't always work.
-         """)
-
-    st.write("***")
-
-    st.write("""
-        ##### TikTok
-        - Single video download.
-        - Profile download - up to last 30 videos.
          """)
 
     st.write("***")
@@ -916,32 +836,8 @@ with tab2:
         with col3:
             confirm_selection_instagram = st.form_submit_button("Submit")
 
-# TikTok tab
-with tab3:
-
-    # create a form to capture URL and take user options
-    with st.form("input_tiktok", clear_on_submit=True):
-
-        # get user URL with a text input box
-        url_from_user_tiktok = st.text_input('Enter a link:', placeholder='https://www.tiktok.com...')
-
-        # create a column layout
-        col1, col2, col3 = st.columns([2, 1, 1])
-
-        # create a selection drop down box
-        with col1:
-            selection_tiktok = st.selectbox('Selection', ('Video', 'Profile'), label_visibility="collapsed")
-
-        # how many posts to download from profile
-        with col2:
-            number_of_posts_tiktok = st.number_input('Leave at zero to grab all posts:', min_value=0, max_value=30, label_visibility="collapsed")
-
-        # create a sumbit button
-        with col3:
-            confirm_selection_tiktok = st.form_submit_button("Submit")
-
 # Reddit tab
-with tab4:
+with tab3:
 
     # create a form to capture URL and take user options
     with st.form("input_reddit", clear_on_submit=True):
@@ -961,7 +857,7 @@ with tab4:
             confirm_selection_reddit = st.form_submit_button("Submit")
 
 # Twitter tab
-with tab5:
+with tab4:
 
     # create a form to capture URL and take user options
     with st.form("input_twitter", clear_on_submit=True):
@@ -981,7 +877,7 @@ with tab5:
             confirm_selection_twitter = st.form_submit_button("Submit")
 
 # Surprise tab
-with tab6:
+with tab5:
 
     # create a form to capture URL and take user options
     with st.form("input_surprise", clear_on_submit=True):
@@ -1027,17 +923,6 @@ if __name__ == "__main__":
                     # grab content and generate download button
                     instagram_download(selection_instagram, number_of_posts_insta)
 
-        # if user submits TikTok button
-        elif confirm_selection_tiktok:
-
-            # if there is input in the URL field
-            if url_from_user_tiktok:
-
-                with st.spinner(''):
-
-                    # grab content and generate download button
-                    tiktok_download(selection_tiktok, number_of_posts_tiktok)
-        
         # if user submits Reddit button
         elif confirm_selection_reddit:
 
