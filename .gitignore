@@ -1,1 +1,4 @@
 ffmpeg.exe
+/build
+/dist
+/site-packages
