@@ -8,3 +8,4 @@ instaloader
 pyktok
 browser-cookie3
 beautifulsoup4
+moviepy==1.0.3
